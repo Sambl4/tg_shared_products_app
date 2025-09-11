@@ -1,0 +1,33 @@
+name: Build and Deploy Angular App
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Replace environment variables
+        run: |
+          # Replace placeholders in environment files with actual secrets
+          sed -i 's|\${API_URL_DEV}|${{ secrets.API_URL_DEV }}|g' src/environments/environment.ts
+          sed -i 's|\${API_URL_PROD}|${{ secrets.API_URL_PROD }}|g' src/environments/environment.prod.ts
+
+      - name: Build Angular app
+        run: ng build --base-href /tg_shared_products_app/
+
+      - name: Deploy to GitHub Pages
+        run: npx angular-cli-ghpages --dir=dist/tgApp/browser --no-silent
