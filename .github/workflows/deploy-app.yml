@@ -29,5 +29,10 @@ jobs:
       - name: Build Angular app
         run: npx ng build --base-href /tg_shared_products_app/
 
+      - name: Configure git
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+
       - name: Deploy to GitHub Pages
         run: npx angular-cli-ghpages --dir=dist/tgApp/browser --no-silent
