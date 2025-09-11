@@ -5,6 +5,11 @@ on:
     branches:
       - master
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -35,4 +40,7 @@ jobs:
           git config --global user.name "GitHub Actions"
 
       - name: Deploy to GitHub Pages
-        run: npx angular-cli-ghpages --dir=dist/tgApp/browser --no-silent
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist/tgApp/browser
