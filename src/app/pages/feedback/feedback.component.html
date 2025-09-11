@@ -1,0 +1,11 @@
+<p>feedback works!</p>
+<form class="feedback-form">
+    <label for="feedback">Your Feedback:</label>
+    <textarea
+        [value] = feedback()
+        (input) = onFeedbackChanged($event)
+    ></textarea>
+    <!-- <button type="submit">Submit</button> -->
+</form>
+
+{{ feedback() }}

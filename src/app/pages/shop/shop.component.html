@@ -1,0 +1,10 @@
+<p>shop works!</p>
+<button (click)="goToFeedback()">feedback</button>
+@for(groupName of productGroupsName; track groupName) {
+    <app-product-list
+    [groupName]="groupName.toUpperCase()"
+    [products]="products.productsGroups[groupName]"
+></app-product-list>
+}
+
+
