@@ -27,7 +27,7 @@ export class ShopComponent implements OnInit, OnDestroy {
     constructor(
         private router: Router,
     ) {
-        this.telegram.MainButton.setText('Start Order');
+        this.telegram.MainButton.setText('show gas');
         this.telegram.MainButton.show();
         this.showData = this.showData.bind(this);
     }
@@ -46,6 +46,7 @@ export class ShopComponent implements OnInit, OnDestroy {
 
     callGas() {
         console.log(this.apiData.value());
+        this.showData();
     }
 
     callSpreadsheet() {
@@ -53,6 +54,6 @@ export class ShopComponent implements OnInit, OnDestroy {
     }
 
     private showData() {
-        this.data.set(this.apiData.value().toString());
+        this.data.set(this.apiData.value()?.data);
     }
 }
