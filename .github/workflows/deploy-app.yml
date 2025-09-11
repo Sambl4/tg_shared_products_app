@@ -31,7 +31,6 @@ jobs:
       - name: Replace environment variables
         run: |
           # Replace placeholders in environment files with actual secrets
-          sed -i 's|\${API_URL_DEV}|${{ secrets.API_URL_DEV }}|g' src/environments/environment.ts
           sed -i 's|\${API_URL_PROD}|${{ secrets.API_URL_PROD }}|g' src/environments/environment.prod.ts
 
       - name: Build Angular app
