@@ -1,5 +1,6 @@
 <p>shop works!</p>
 <button (click)="goToFeedback()">feedback</button>
+<div>data: {{data()}}</div>
 @for(groupName of productGroupsName; track groupName) {
     <app-product-list
     [groupName]="groupName.toUpperCase()"

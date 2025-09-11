@@ -1,4 +1,4 @@
-import { Component, effect, inject, resource } from '@angular/core';
+import { Component, effect, inject, OnDestroy, OnInit, resource, signal } from '@angular/core';
 import { TelegramService } from '../../services/telegram.service';
 import { ProductGroup, ProductService } from '../../services/product.service';
 import { ProductListComponent } from '../../components/product-list.component/product-list.component';
@@ -12,11 +12,11 @@ import { environment } from '../../../environments/environment';
   templateUrl: './shop.component.html',
   styleUrl: './shop.component.css'
 })
-export class ShopComponent {
+export class ShopComponent implements OnInit, OnDestroy {
     telegram = inject(TelegramService);
     products = inject(ProductService);
     productGroupsName = Object.values(ProductGroup);
-
+    data = signal('');
 
     apiData = resource({
         loader: () => {
@@ -29,6 +29,15 @@ export class ShopComponent {
     ) {
         this.telegram.MainButton.setText('Start Order');
         this.telegram.MainButton.show();
+        this.showData = this.showData.bind(this);
+    }
+
+    ngOnInit(): void {
+        this.telegram.MainButton.onClick(() => this.showData);
+    }
+
+    ngOnDestroy(): void {
+        this.telegram.MainButton.offClick(() => this.showData);
     }
 
     goToFeedback() {
@@ -36,10 +45,14 @@ export class ShopComponent {
     }
 
     callGas() {
-        console.log(this.apiData.value())
+        console.log(this.apiData.value());
     }
 
     callSpreadsheet() {
-        console.log('')
+        console.log('');
+    }
+
+    private showData() {
+        this.data.set(this.apiData.value().toString());
     }
 }

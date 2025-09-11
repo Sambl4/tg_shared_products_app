@@ -14,10 +14,8 @@ export class ProductListComponent {
   @Input() products: IProduct[] = [];
 
   constructor() {
-    console.log(this.products);
   }
 
   ngOnInit() {
-    console.log(this.products);
   }
 }

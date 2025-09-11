@@ -4,6 +4,8 @@ interface ITgButton {
   setText(text: string): void;
   show(): void;
   hide(): void;
+  onClick(callback: () => void): void;
+  offClick(callback: () => void): void;
 }
 
 @Injectable({
@@ -23,5 +25,9 @@ export class TelegramService {
 
   get MainButton(): ITgButton {
   return this.tg.MainButton;
+  }
+
+  ready(): void {
+    this.tg.ready();
   }
 }
