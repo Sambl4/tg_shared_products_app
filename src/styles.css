@@ -1,4 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 body {
     background: var(--tg-theme-bg-color);
     color: var(--tg-theme-text-color);
+}
+
+/* Custom Telegram-themed components */
+@layer components {
+  .tg-button {
+    @apply bg-tg-button text-tg-button-text border border-gray-300 rounded-lg px-4 py-2 font-medium transition-all duration-200;
+  }
+  
+  .tg-button:hover {
+    @apply opacity-80;
+  }
+  
+  .tg-card {
+    @apply bg-tg-secondary-bg rounded-xl shadow-sm;
+  }
+
+  .tg-card.selected {
+    @apply bg-tg-secondary-bg rounded-xl shadow-sm border border-blue-100;
+  }
+  
+  .tg-input {
+    @apply bg-tg-secondary-bg border border-gray-300 rounded-lg px-3 py-1 text-tg-text placeholder-tg-hint;
+  }
+
+  /* Input with icon wrapper */
+  .input-with-icon {
+    @apply relative flex items-center;
+  }
+  
+  .input-with-icon input {
+    @apply w-full bg-white border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  }
+  
+  .input-with-icon .icon {
+    @apply absolute left-3 text-gray-400 pointer-events-none;
+  }
+
+  /* Simple icon styles using Unicode symbols */
+  .icon-search::before { content: "🔍"; }
+  .icon-filter::before { content: "⚙️"; }
+  .icon-user::before { content: "👤"; }
+  .icon-email::before { content: "✉️"; }
+  .icon-phone::before { content: "📞"; }
+  .icon-lock::before { content: "🔒"; }
 }

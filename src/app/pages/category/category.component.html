@@ -1,0 +1,26 @@
+<div class="category tg-card mb-2" [ngClass]="{'selected': isCategoryOpened}">
+  <div class="flex justify-between">
+    <h2 class="category-name" (click)="toggleCategory()">
+      {{ categoryName }} ({{ categoryProducts().length }})
+    </h2>
+    @if(isCategoryOpened) {
+    <!-- <a class="category-edit" [routerLink]="['/category', categoryId()]" disabled> -->
+      <app-icon class="text-gray-400" name="edit"></app-icon>
+    <!-- </a> -->
+    }
+  </div>
+  @if(isCategoryOpened && !categoryProducts().length) {
+    <div class="p-2 text-red-300">{{ emptyListMsg }}</div>
+  } @else if(isCategoryOpened && categoryProducts().length) {
+    <app-product-list class="category-item" [products]="categoryProducts()"></app-product-list>
+  }
+    
+
+    <!-- <p>{{category.id}}</p>
+    <p>{{category.products.length}} products</p> -->
+    <!-- @for(product of category.products; track product.id) {
+            <li>
+                <a [routerLink]="['/product', product.id]">{{product.title}}</a>
+            </li>
+        } -->
+</div>

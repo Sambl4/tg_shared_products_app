@@ -1,0 +1,96 @@
+<div class="main-container p-6 flex flex-col justify-between gap-4">
+  <div class="flex flex-row justify-between">
+    <div class="relative">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <app-icon name="search"></app-icon>
+      </div>
+      <input
+        type="text"
+        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+        placeholder="Search"
+        (input)="searchTerm.set($event.target.value)"
+        [value]="searchTerm()"
+        />
+         @if(searchTerm()) {
+           <div
+              class="absolute inset-y-0 right-0 pr-2 flex items-center"
+              (click)="searchTerm.set('')">
+                <app-icon name="close"></app-icon>
+           </div>
+         }
+    </div>
+    <div class="flex flex-row justify-between gap-1">
+      <app-toggler
+        class="toggler"
+        [isChecked]="isRequiredProductList()"
+        (checkedChange)="onRequiredTogglerChanged($event)"
+        [disabled]="!!searchTerm()">
+      </app-toggler>
+      <button
+        (click)="toggleFilterPanel()"
+        [ngClass]="{'active': isFilterPanel}"
+        class="tg-button">
+          <app-icon name="filter"></app-icon>
+      </button>
+      <button
+        class="tg-button"
+        disabled="true">
+          <app-icon name="gear"></app-icon>
+      </button>
+    </div>
+  </div>
+  @if(isFilterPanel) {
+  <div class="main-container-filter-panel flex flex-wrap gap-3 border-b-2 border-blue-200 pb-3">
+    <button
+        (click)="onResetFilter()"
+        class="tg-button filter-btn">
+          All
+      </button>
+    @for(category of productCategories(); track category.id) {
+      <button
+        (click)="onFilterCategory(category.id)"
+        class="tg-button filter-btn"
+        [ngClass]="{'active': !category.isHidden}">
+          {{ category.category }}
+      </button>
+    }
+  </div>
+  }
+
+<!-- <button (click)="goToFeedback()">feedback</button> -->
+  <div class="main-container-content flex flex-col">
+    @if(!searchTerm()) {
+      @for(category of productCategories(); track category.id) {
+        @if(!category.isHidden) {
+          <app-category
+            [categoryName]="category.category"
+            [categoryId]="category.id"
+            [isRequiredProductList]="isRequiredProductList()"
+        ></app-category>
+        }
+      }
+  } @else {
+    @let products = searchTermProducts();
+    @if(products.length) {
+      <app-product-list [products]="searchTermProducts()"></app-product-list>
+    } @else {
+      <div class="p-2 text-red-300 mx-auto">{{ emptyListMsg }}</div>
+    }
+  }
+  </div>
+
+  <div class="flex flex-col gap-4">
+    <!-- <button class="tg-button" (click)="callGas()">gas</button>
+    <button class="tg-button" (click)="callSpreadsheet()">Spreadsheet</button> -->
+    <button
+      class="tg-button"
+      [ngClass]="{'active': draftProductCount()}"
+      [disabled]="!draftProductCount()"
+      (click)="updateDraftProducts()">
+        Update
+        @if(draftProductCount()) {
+          <span>({{draftProductCount()}})</span>
+        }
+    </button>
+  </div>
+</div>

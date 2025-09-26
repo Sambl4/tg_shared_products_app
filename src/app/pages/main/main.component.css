@@ -1,0 +1,33 @@
+.main-container {
+  height: 100vh;
+
+  .toggler {
+    transform: rotate(90deg);
+  }
+
+  .tg-button.active{
+    @apply bg-blue-100 border border-blue-300;
+  }
+
+  .tg-button.active:active {
+    @apply bg-blue-300 border border-blue-700;
+  }
+
+  .tg-button:disabled {
+    @apply bg-gray-100 border border-gray-300 text-gray-500;
+  }
+  .tg-button:disabled:active {
+    @apply bg-gray-300 border border-gray-700;
+  }
+
+  .main-container-content {
+    height: 100%;
+    overflow-x: hidden;
+  }
+
+  .filter-btn {
+    height: 32px;
+    padding: 0 12px;
+    flex: auto;
+  }
+}

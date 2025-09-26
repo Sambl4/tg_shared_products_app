@@ -18,7 +18,7 @@ export class ProductComponent {
         private router: Router,
     ) {
         const id = this.route.snapshot.paramMap.get('id') || '';
-        this.product = this.productService.getProductById(id) || null;
+        this.product = this.productService.getProductById(+id) || null;
         console.log(this.product);
     }
 

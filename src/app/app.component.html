@@ -1,4 +1,9 @@
-<h1>Hello, {{ title() }}</h1>
-<router-outlet>
-  
-</router-outlet>
+@let error = productService.error();
+@if(productService.isLoading() || isLoading())
+{
+  <app-loader></app-loader>
+} @else if (!!error) {
+  <div class="tg-card bg-red-100 border border-red-100 rounded-lg text-red-500">{{ error }}</div>
+} @else {
+  <router-outlet></router-outlet>
+}

@@ -1,0 +1,17 @@
+.category {
+    padding: 12px;
+
+    .category-item {
+        display: block;
+        margin-left: 12px;
+    }
+}
+
+.category.selected {
+    padding: 12px 12px 0 12px;
+
+    .category-name {
+        margin-left: 12px;
+        font-weight: 600;
+    }
+}

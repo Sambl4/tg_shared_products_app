@@ -1,0 +1,31 @@
+.category-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.product-item {
+    display: flex;
+    gap: 12px;
+    height: 50px;
+    align-items: center;
+    border-top: 1px solid #ccc;
+    margin-bottom: 4px;
+    padding-right: 10px;
+
+    .product-actions {
+        /* display: flex; */
+        width: 22px;
+        /* gap: 12px; */
+        /* justify-content: center; */
+    }
+
+    .product-title {
+        flex: 1;
+    }
+
+    .product-edit {
+        margin-left: auto;
+        flex-shrink: 0;
+    }
+}
