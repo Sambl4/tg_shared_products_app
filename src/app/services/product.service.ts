@@ -1,5 +1,5 @@
 import { computed, effect, Injectable, resource, ResourceStatus, Signal, signal } from '@angular/core';
-import { environment } from '../../environments/environment.prod.local';
+import { environment } from '../../environments/environment';
 
 // export enum ProductGroup {
 //   Electronics = 'electronics',
