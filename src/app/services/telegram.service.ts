@@ -4,6 +4,8 @@ interface ITgButton {
   setText(text: string): void;
   show(): void;
   hide(): void;
+  enable(): void;
+  disable(): void;
   onClick(callback: () => void): void;
   offClick(callback: () => void): void;
 }

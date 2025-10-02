@@ -3,10 +3,11 @@ import { RouterOutlet } from '@angular/router';
 import { TelegramService } from './services/telegram.service';
 import { LoaderComponent } from './components/loader/loader.component/loader.component';
 import { ProductService } from './services/product.service';
+import { IconComponent } from './components/icons/icons.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, LoaderComponent],
+  imports: [RouterOutlet, IconComponent, LoaderComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

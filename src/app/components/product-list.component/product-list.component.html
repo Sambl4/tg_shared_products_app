@@ -4,11 +4,15 @@
   @for(product of productsList; track product.id) {
   <div class="product-item">
     <div class="product-actions">
-      @if(product.isDone) {
-        <app-icon (click)="removeFromCart(product.id)" name="check" size="w-6 h-6" class="text-green-700"></app-icon>
+      @if(product.isDone && !product.isDraft) {
+        <app-icon (click)="addToDraft(product.id)" name="check" size="w-6 h-6" class="text-green-700"></app-icon>
       }
       @else if(product.isDraft) {
-        <app-icon class="text-orange-500" (click)="removeFromDraft(product.id)" name="cartDash"></app-icon>
+        <app-icon
+          class="text-orange-500"
+          (click)="removeFromDraft(product.id)"
+          [name]="product.isDone ? 'cart' : 'cartDash'">
+        </app-icon>
       } @else {
         <app-icon (click)="addToDraft(product.id)" name="cartPlus" class="text-gray-500"></app-icon>
       }
@@ -18,12 +22,10 @@
       [ngClass]="{'text-orange-500': product.isDraft}">
       {{product.title}}
     </div>
-    @if(!product.isDone) {
-      <app-icon (click)="updateCart(product.id)" name="update"></app-icon>
+      <app-icon (click)="updateCartById(product)" name="update"></app-icon>
       <!-- <a class="product-edit" [routerLink]="['/product', product.id]">
         <app-icon name="edit"></app-icon>
       </a> -->
-    }
   </div>
   }
 }

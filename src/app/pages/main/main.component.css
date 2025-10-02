@@ -6,11 +6,11 @@
   }
 
   .tg-button.active{
-    @apply bg-blue-100 border border-blue-300;
+    @apply bg-blue-500 border border-blue-700;
   }
 
   .tg-button.active:active {
-    @apply bg-blue-300 border border-blue-700;
+    @apply bg-blue-700 border border-blue-900;
   }
 
   .tg-button:disabled {

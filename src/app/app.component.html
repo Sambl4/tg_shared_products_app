@@ -1,9 +1,22 @@
 @let error = productService.error();
+@let msg = productService.serviceMessage();
+
+
 @if(productService.isLoading() || isLoading())
 {
   <app-loader></app-loader>
 } @else if (!!error) {
   <div class="tg-card bg-red-100 border border-red-100 rounded-lg text-red-500">{{ error }}</div>
 } @else {
+  
+@if (!!msg) {
+  <!-- <span class="absolute w-full h-5 bg-green-100 border text-green-500 ">{{ msg }}</span> -->
+   <div 
+    class="fixed w-[90%] top-2 left-1/2 transform -translate-x-1/2 bg-green-100 border border-green-300 text-green-700 px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2"
+    (click)="productService.serviceMessage.set(null)">
+    <app-icon class="text-green-700" name="checkCircleFill"></app-icon>
+    {{ msg }}
+  </div>
+}
   <router-outlet></router-outlet>
 }

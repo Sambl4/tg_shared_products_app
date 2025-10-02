@@ -24,19 +24,43 @@ import { ProductListComponent } from '../../components/product-list.component/pr
 export class MainComponent implements OnInit, OnDestroy {
   telegram = inject(TelegramService);
   productService = inject(ProductService);
-  productCategories: Signal<{id: string, category: string, isHidden: boolean }[]> = computed(() => {
+  productCategories: Signal<IProductCategory[]> = computed(() => {
     const categories = this.productService.getProductsCategories();
     return Object
       .entries(categories)
-      .map(([id, category]) => ({ id, category, isHidden: this.filteredCategories()[id] || false }))
+      .map(([id, category]) => {
+          const products = this.productService.productsByCategory()[id]
+            .filter((product: IProduct) => this.isRequiredProductList() ? !product.isDone : true);
+
+          return {
+            id,
+            category,
+            products,
+            isHidden: this.filteredCategories()[id] || products.length === 0 || false
+          };
+      });
   });
   draftProductCount = this.productService.draftProductCount;
-  searchTermProducts = computed(() => {
-return this.productService.products()
-      .filter((product: IProduct) => product.title
-        .includes(this.searchTerm())
-        //  && product.isDone === this.isRequiredProductList()
-      );
+  searchTermProductsList = computed(() => this.productService.products()
+    .filter((product: IProduct) => product.title
+      .includes(this.searchTerm())
+      //  && product.isDone === this.isRequiredProductList()
+    )
+  );
+
+  isDraftList = false;;
+  draftProductsList = computed(() => {
+    const products = this.productService.products();
+    return products.filter((prod) => prod.isDraft);
+  });
+
+  productsByCategory = computed(() => {
+    return this.productService.productsByCategory();
+      // .filter((product: IProduct) => product.order === +this.selectedCategoryId())
+      // .filter((product: IProduct) => this.isRequiredProductList() ? !product.isDone : true);
+  });
+  productsByCategoryEntries = computed(() => {
+    return Object.entries(this.productsByCategory());
   });
 
   isFilterPanel = false;
@@ -48,23 +72,34 @@ return this.productService.products()
   constructor(
     private router: Router,
   ) {
-    this.telegram.MainButton.setText('show gas');
+    this.telegram.MainButton.setText('Update');
     this.telegram.MainButton.show();
-    this.showData = this.showData.bind(this);
+    this.telegram.MainButton.disable();
+    this.updateDraftProducts = this.updateDraftProducts.bind(this);
 
     effect(() => {
-      this.searchTermProducts();
+      this.searchTermProductsList();
       this.isFilterPanel = false;
-      ;
     });
+
+    effect(() => {
+      const draftList = this.draftProductsList();
+      if(this.isDraftList && !draftList.length) {
+        this.isDraftList = false;
+      }
+
+      draftList.length ?
+        this.telegram.MainButton.enable() :
+        this.telegram.MainButton.disable();
+    })
   }
 
   ngOnInit(): void {
-    this.telegram.MainButton.onClick(() => this.showData);
+    this.telegram.MainButton.onClick(() => this.updateDraftProducts());
   }
 
   ngOnDestroy(): void {
-    this.telegram.MainButton.offClick(() => this.showData);
+    this.telegram.MainButton.offClick(() => this.updateDraftProducts());
   }
 
   goToFeedback() {
@@ -98,8 +133,13 @@ return this.productService.products()
     this.filteredCategories.set({});
   }
 
-  updateDraftProducts() {
-    console.log('Update draft products');
+  onDraftProductList() {
+    this.isDraftList = !this.isDraftList;
+    this.productService.updateCartList();
+  }
+
+  private updateDraftProducts() {
+    this.productService.updateCartList();
   }
 
   private showData() {

@@ -1,12 +1,13 @@
 <div class="main-container p-6 flex flex-col justify-between gap-4">
   <div class="flex flex-row justify-between">
+    <!-- search section -->
     <div class="relative">
       <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
         <app-icon name="search"></app-icon>
       </div>
       <input
         type="text"
-        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+        class="text-gray-900 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
         placeholder="Search"
         (input)="searchTerm.set($event.target.value)"
         [value]="searchTerm()"
@@ -19,6 +20,7 @@
            </div>
          }
     </div>
+    <!-- action buttons section -->
     <div class="flex flex-row justify-between gap-1">
       <app-toggler
         class="toggler"
@@ -59,38 +61,44 @@
 
 <!-- <button (click)="goToFeedback()">feedback</button> -->
   <div class="main-container-content flex flex-col">
-    @if(!searchTerm()) {
+    @let searchedProducts = searchTermProductsList();
+    @let draftProducts = draftProductsList();
+
+    @if(searchTerm()) {
+      @if(searchedProducts.length) {
+        <app-product-list [products]="searchedProducts"></app-product-list>
+      } @else {
+        <div class="p-2 text-red-300 mx-auto">{{ emptyListMsg }}</div>
+      }
+    } @else if(draftProducts.length && isDraftList) {
+      <app-product-list [products]="draftProducts"></app-product-list>
+    } @else {
       @for(category of productCategories(); track category.id) {
         @if(!category.isHidden) {
           <app-category
             [categoryName]="category.category"
             [categoryId]="category.id"
-            [isRequiredProductList]="isRequiredProductList()"
-        ></app-category>
+            [products]="category.products"
+          ></app-category>
         }
       }
-  } @else {
-    @let products = searchTermProducts();
-    @if(products.length) {
-      <app-product-list [products]="searchTermProducts()"></app-product-list>
-    } @else {
-      <div class="p-2 text-red-300 mx-auto">{{ emptyListMsg }}</div>
     }
-  }
   </div>
 
-  <div class="flex flex-col gap-4">
-    <!-- <button class="tg-button" (click)="callGas()">gas</button>
-    <button class="tg-button" (click)="callSpreadsheet()">Spreadsheet</button> -->
-    <button
-      class="tg-button"
-      [ngClass]="{'active': draftProductCount()}"
-      [disabled]="!draftProductCount()"
-      (click)="updateDraftProducts()">
-        Update
-        @if(draftProductCount()) {
-          <span>({{draftProductCount()}})</span>
-        }
-    </button>
-  </div>
+  @if (draftProductsList().length) {
+    <div class="flex flex-col gap-4">
+      <!-- <button class="tg-button" (click)="callGas()">gas</button>
+      <button class="tg-button" (click)="callSpreadsheet()">Spreadsheet</button> -->
+      <button
+        class="tg-button"
+        (click)="onDraftProductList()">
+          @if(isDraftList) {
+            All items
+          } @else {
+            Draft list
+            <span>({{draftProductsList().length}})</span>
+          }
+      </button>
+    </div>
+  }
 </div>

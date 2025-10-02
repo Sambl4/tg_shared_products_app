@@ -36,11 +36,11 @@ export class ProductListComponent {
     this.productService.updateProductDraftState(id, false);
   }
 
-  removeFromCart(id: number) {
-    this.productService.removeProductFromCart(id);
-  }
+  // removeFromCart(id: number) {
+  //   this.productService.removeProductFromCart(id);
+  // }
 
-  updateCart(id: number) {
-    this.productService.updateCart(id);
+  updateCartById(product: IProduct) {
+    this.productService.updateCartById(product.id, !product.isDone);
   }
 }

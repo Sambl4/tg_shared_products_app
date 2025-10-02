@@ -15,8 +15,9 @@ export type TProductCategory = {
 
 export interface IProductCategory {
   category: string;
-  id: number;
+  id: string;
   products: IProduct[];
+  isHidden?: boolean;
 }
 export interface IProduct {
   title: string,
@@ -179,6 +180,7 @@ export class ProductService {
   products = this._products.asReadonly();
   isLoading = isTestData ? computed(() => false) : computed(() =>this._apiData.isLoading());
   error = computed(() => this._apiData.error());
+  serviceMessage = signal<string | null>(null);
 
   draftProductCount = computed(() => {
     const products = this._products();
@@ -195,6 +197,19 @@ export class ProductService {
       acc[product.order || 0] = product.category;
       return acc;
     }, {} as Record<number, string>);
+  });
+
+  productsByCategory = computed<TProductCategory>(() => {
+    const products = this._products();
+    return products.reduce((category: TProductCategory, product: IProduct): TProductCategory => {
+      // order is id of category
+      const type = product.order;
+      if (!category[type]) {
+        category[type] = [];
+      }
+      category[type].push(product);
+      return category;
+    }, {});
   });
 
   constructor() {
@@ -219,14 +234,77 @@ export class ProductService {
     this._products.update(currentItems => currentItems.map(item => item.id === id ? {...item, isDraft: state} : item));
   }
 
-  removeProductFromCart(id: number) {
-    this._products.update(currentItems => currentItems.map(item => item.id === id ? {...item, isDone: false} : item));
+  private resetDraftState(): void {
+    this._products.update(currentItems => currentItems.map(item => item.isDraft ? {...item, isDraft: false} : item));
   }
 
-  updateCart(id: number) {
-    // TODO update for backend by id
-    this._products.update(currentItems => currentItems.map(item => item.id === id ? {...item, isDone: true} : item));
-    this.updateProductDraftState(id, false);
+  updateCartById(id: number, newStatus: boolean) {
+    let updatedProduct: IProduct | undefined;
+
+    this._products.update(currentItems => currentItems
+      .map(item => {
+        if (item.id === id) {
+          updatedProduct = {
+            ...item,
+            isDone: newStatus,
+            isDraft: false,
+          };
+          return updatedProduct;
+        } else {
+          return item;
+        }
+      })
+    );
+
+    if(updatedProduct) {
+      this.updateCart([updatedProduct]);
+    }
+  }
+
+  updateCartList() {
+    let updatedProducts: IProduct[] = [];
+
+    const products = this._products.update(currentItems => currentItems
+      .map(item => {
+        if (item.isDraft) {
+          const product = {
+            ...item,
+            isDone: !item.isDone,
+            isDraft: false,
+          }
+
+          updatedProducts.push(product);
+          return product;
+        } else {
+          return item;
+        }
+      }));
+
+    if(updatedProducts.length) {
+      this.updateCart(updatedProducts);
+    }
+  }
+
+  private updateCart(products: IProduct[]) {
+    // console.log('updateCart', products);
+    // return;
+    const options = {
+      method: 'POST',
+      body: JSON.stringify({
+        method:"Update",
+        data: products,
+      }),
+    }
+
+    fetch(`${environment.apiUrl}`, options).then(async resp => {
+      // r.status === 200;
+      // if(resp.ok) {
+        this.serviceMessage.set(await resp.text());
+        // setTimeout(() => {
+        //   this.serviceMessage.set(null);
+        // }, 3000)
+      // }
+    })
   }
 
   getProductsByCategoryId(categoryId: string): Signal<IProduct[]> {
