@@ -1,0 +1,12 @@
+<div class="w-full h-screen flex items-center justify-center">
+  <div class="tg-card p-[15%] flex flex-col gap-4">
+    <button (click)="openGroupList()" class="tg-button">Join group</button>
+    <app-popup
+      [isOpen]="isGroupListOpen"
+      (closePopup)="isGroupListOpen = false"
+      [title]="'qwe'">
+      qwelacldksj;fie
+    </app-popup>
+    <button class="tg-button disabled">Create group</button>
+  </div>
+</div>

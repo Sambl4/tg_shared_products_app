@@ -1,15 +1,22 @@
 <div class="main-container p-6 flex flex-col justify-between gap-4">
-  <div class="flex flex-row justify-between">
+  <div class="flex flex-row gap-[25px]">
     <!-- search section -->
-    <div class="relative">
+    <div class="relative w-full duration-300"
+      [ngClass]="{
+        'w-[10%]': !isSearching,
+        'duration-500': isSearching, 
+        'duration-200': !isSearching,
+        }">
       <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
         <app-icon name="search"></app-icon>
       </div>
       <input
         type="text"
-        class="text-gray-900 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+        class="w-full text-gray-900 pl-10 pr-1 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
         placeholder="Search"
         (input)="searchTerm.set($event.target.value)"
+        (focus)="isSearching = true"
+        (blur)="searchTerm.set(''); isSearching = false"
         [value]="searchTerm()"
         />
          @if(searchTerm()) {
@@ -20,43 +27,67 @@
            </div>
          }
     </div>
+
     <!-- action buttons section -->
-    <div class="flex flex-row justify-between gap-1">
-      <app-toggler
-        class="toggler"
-        [isChecked]="isRequiredProductList()"
-        (checkedChange)="onRequiredTogglerChanged($event)"
-        [disabled]="!!searchTerm()">
-      </app-toggler>
-      <button
-        (click)="toggleFilterPanel()"
-        [ngClass]="{'active': isFilterPanel}"
-        class="tg-button">
-          <app-icon name="filter"></app-icon>
-      </button>
-      <button
-        class="tg-button"
-        disabled="true">
-          <app-icon name="gear"></app-icon>
-      </button>
-    </div>
-  </div>
-  @if(isFilterPanel) {
-  <div class="main-container-filter-panel flex flex-wrap gap-3 border-b-2 border-blue-200 pb-3">
-    <button
-        (click)="onResetFilter()"
-        class="tg-button filter-btn">
-          All
-      </button>
-    @for(category of productCategories(); track category.id) {
-      <button
-        (click)="onFilterCategory(category.id)"
-        class="tg-button filter-btn"
-        [ngClass]="{'active': !category.isHidden}">
-          {{ category.category }}
-      </button>
+    @if(!isSearching) {
+      <div class="flex flex-row justify-between w-full">
+        @if (draftProductsList().length) {
+          <div class="flex flex-col gap-4">
+            <!-- <button class="tg-button" (click)="callGas()">gas</button>
+            <button class="tg-button" (click)="callSpreadsheet()">Spreadsheet</button> -->
+            <button
+              class="tg-button"
+              (click)="onDraftProductList()">
+                @if(isDraftList) {
+                  All
+                } @else {
+                  <span>({{draftProductsList().length}})</span>
+                }
+            </button>
+          </div>
+        }
+        
+        <div class="right-slot w-full flex gap-4 justify-end">
+          
+          <app-toggler
+            class="rotate-90"
+            [isChecked]="isRequiredProductList()"
+            (checkedChange)="onRequiredTogglerChanged($event)"
+            [disabled]="!!searchTerm()">
+          </app-toggler>
+          <button
+            (click)="toggleFilterPanel()"
+            [ngClass]="{'active': isFilterPanel}"
+            class="tg-button">
+              <app-icon name="filter"></app-icon>
+          </button>
+          <button
+            class="tg-button"
+            (click)="openPopup()">
+              <app-icon name="gear"></app-icon>
+          </button>
+        </div>
+      </div>
     }
   </div>
+  @if(isFilterPanel) {
+    <div class="main-container-filter-panel flex flex-wrap gap-3 border-b-2 border-blue-200 pb-3">
+      <button
+          (click)="onResetFilter()"
+          class="tg-button filter-btn">
+            All
+        </button>
+      @for(category of productCategories(); track category.id) {
+        @if (category.products.length) {
+          <button
+            (click)="onFilterCategory(category.id)"
+            class="tg-button filter-btn"
+            [ngClass]="{'active': !category.isHidden}">
+              {{ category.category }}
+          </button>
+        }
+      }
+    </div>
   }
 
 <!-- <button (click)="goToFeedback()">feedback</button> -->
@@ -85,20 +116,47 @@
     }
   </div>
 
-  @if (draftProductsList().length) {
-    <div class="flex flex-col gap-4">
-      <!-- <button class="tg-button" (click)="callGas()">gas</button>
-      <button class="tg-button" (click)="callSpreadsheet()">Spreadsheet</button> -->
-      <button
-        class="tg-button"
-        (click)="onDraftProductList()">
-          @if(isDraftList) {
-            All items
-          } @else {
-            Draft list
-            <span>({{draftProductsList().length}})</span>
-          }
+</div>
+
+<!-- Popup Demo -->
+<app-popup 
+  [isOpen]="isPopupOpen()"
+  [title]="'Settings'"
+  [showCloseButton]="true"
+  [closeOnOutsideClick]="true"
+  [closeOnEscape]="true"
+  [maxWidth]="'400px'"
+  [maxHeight]="'600px'"
+  (closePopup)="closePopup()">
+  
+  <div class="space-y-4">
+    <h4 class="text-lg font-semibold text-gray-800">Demo Settings</h4>
+    <p class="text-gray-600">This is a demo popup component optimized for mobile devices.</p>
+    
+    <div class="space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="text-sm font-medium text-gray-700">Notifications</span>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" class="sr-only peer">
+          <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+        </label>
+      </div>
+      
+      <div class="flex items-center justify-between">
+        <span class="text-sm font-medium text-gray-700">Dark Mode</span>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" class="sr-only peer">
+          <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+        </label>
+      </div>
+    </div>
+    
+    <div class="pt-4 border-t border-gray-200">
+      <button 
+        class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+        (click)="closePopup()">
+        Save Settings
       </button>
     </div>
-  }
-</div>
+  </div>
+</app-popup>

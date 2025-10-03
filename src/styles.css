@@ -16,6 +16,10 @@ body {
   .tg-button:hover {
     @apply opacity-80;
   }
+
+  .tg-button.disabled {
+    @apply bg-gray-100 border border-gray-300 text-gray-500 cursor-not-allowed;
+  }
   
   .tg-card {
     @apply bg-tg-secondary-bg rounded-xl shadow-sm;

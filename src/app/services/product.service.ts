@@ -1,5 +1,6 @@
-import { computed, effect, Injectable, resource, ResourceStatus, Signal, signal } from '@angular/core';
+import { computed, effect, inject, Injectable, resource, ResourceStatus, Signal, signal } from '@angular/core';
 import { environment } from '../../environments/environment';
+import { CacheKeys, CacheService } from './cache.service';
 
 // export enum ProductGroup {
 //   Electronics = 'electronics',
@@ -151,6 +152,7 @@ const isTestData = false;
   providedIn: 'root'
 })
 export class ProductService {
+  private cacheService = inject(CacheService);
   private _apiData = isTestData ? resource<IProduct[], unknown>({
     loader: async () => {
       const prom = new Promise((res, rej) => {
@@ -172,13 +174,25 @@ export class ProductService {
       if(!resp.status) {
         throw Error('Failed to load products');
       }
-      return await resp.data;
+      const data = await resp.data;
+
+      this.cacheService.saveToCache(CacheKeys.PRODUCTS, data);
+      
+      return data;
     }
   });
 
   private _products = signal<IProduct[]>([]);
   products = this._products.asReadonly();
-  isLoading = isTestData ? computed(() => false) : computed(() =>this._apiData.isLoading());
+
+  isLoading = computed(() => {
+    if (isTestData) return false;
+
+    const isDataLoading = this._apiData.isLoading();
+    const hasCachedData = this._products().length > 0;
+
+    return isDataLoading && !hasCachedData;
+  });
   error = computed(() => this._apiData.error());
   serviceMessage = signal<string | null>(null);
 
@@ -213,11 +227,14 @@ export class ProductService {
   });
 
   constructor() {
+    this.loadCachedDataIfAvailable();
+
     effect(() => {
       const data = this._apiData.value();
 
       if (data) {
         this._products.set(data);
+        // this.cacheService.saveToCache(data);
       }
     });
   }
@@ -232,6 +249,13 @@ export class ProductService {
 
   updateProductDraftState(id: number, state: boolean): void {
     this._products.update(currentItems => currentItems.map(item => item.id === id ? {...item, isDraft: state} : item));
+  }
+
+  private loadCachedDataIfAvailable(): void {
+    const cachedData = this.cacheService.getFromCache(CacheKeys.PRODUCTS);
+    if (cachedData && cachedData.length > 0) {
+      this._products.set(cachedData);
+    }
   }
 
   private resetDraftState(): void {
@@ -296,6 +320,7 @@ export class ProductService {
       }),
     }
 
+    this.serviceMessage.set('Updating...');
     fetch(`${environment.apiUrl}`, options).then(async resp => {
       // r.status === 200;
       // if(resp.ok) {

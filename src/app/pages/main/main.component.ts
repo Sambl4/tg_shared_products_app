@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { CategoryComponent } from '../category/category.component';
 import { IconComponent } from '../../components/icons/icons.component';
 import { TogglerComponent } from '../../components/toggler/toggler.component';
+import { PopupComponent } from '../../components/popup/popup.component';
 import { NgClass } from '@angular/common';
 import { ProductListComponent } from '../../components/product-list.component/product-list.component';
 
@@ -17,6 +18,7 @@ import { ProductListComponent } from '../../components/product-list.component/pr
     IconComponent,
     ProductListComponent,
     TogglerComponent,
+    PopupComponent,
   ],
   templateUrl: './main.component.html',
   styleUrl: './main.component.css'
@@ -42,13 +44,17 @@ export class MainComponent implements OnInit, OnDestroy {
   });
   draftProductCount = this.productService.draftProductCount;
   searchTermProductsList = computed(() => this.productService.products()
-    .filter((product: IProduct) => product.title
-      .includes(this.searchTerm())
+    .filter((product: IProduct) => product.title.toLowerCase()
+      .includes(this.searchTerm().toLowerCase())
       //  && product.isDone === this.isRequiredProductList()
     )
   );
 
-  isDraftList = false;;
+  isDraftList = false;
+  
+  // Popup demo state
+  isPopupOpen = signal(false);
+  
   draftProductsList = computed(() => {
     const products = this.productService.products();
     return products.filter((prod) => prod.isDraft);
@@ -64,6 +70,7 @@ export class MainComponent implements OnInit, OnDestroy {
   });
 
   isFilterPanel = false;
+  isSearching = false;
   emptyListMsg = 'No products found';
   isRequiredProductList = signal(true);
   searchTerm = model('');
@@ -73,8 +80,8 @@ export class MainComponent implements OnInit, OnDestroy {
     private router: Router,
   ) {
     this.telegram.MainButton.setText('Update');
-    this.telegram.MainButton.show();
-    this.telegram.MainButton.disable();
+    // this.telegram.MainButton.show();
+    // this.telegram.MainButton.disable();
     this.updateDraftProducts = this.updateDraftProducts.bind(this);
 
     effect(() => {
@@ -89,8 +96,8 @@ export class MainComponent implements OnInit, OnDestroy {
       }
 
       draftList.length ?
-        this.telegram.MainButton.enable() :
-        this.telegram.MainButton.disable();
+        this.telegram.MainButton.show() :
+        this.telegram.MainButton.hide();
     })
   }
 
@@ -120,7 +127,8 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   onRequiredTogglerChanged(event: boolean) {
-    this.isRequiredProductList.update(() => event)
+    this.onResetFilter();
+    this.isRequiredProductList.update(() => event);
   }
 
   onFilterCategory(id: string) {
@@ -135,7 +143,15 @@ export class MainComponent implements OnInit, OnDestroy {
 
   onDraftProductList() {
     this.isDraftList = !this.isDraftList;
-    this.productService.updateCartList();
+  }
+
+  // Popup demo methods
+  openPopup() {
+    this.isPopupOpen.set(true);
+  }
+
+  closePopup() {
+    this.isPopupOpen.set(false);
   }
 
   private updateDraftProducts() {

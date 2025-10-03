@@ -1,0 +1,36 @@
+<!-- Backdrop overlay -->
+<div 
+  *ngIf="isOpen"
+  class="fixed inset-0 bg-black bg-opacity-10 flex items-center justify-center p-4 z-50 backdrop-blur-sm"
+  (click)="onBackdropClick($event)">
+  
+  <!-- Popup content container -->
+  <div 
+    #popupContent
+    class="bg-white rounded-lg shadow-2xl relative animate-scale-in w-full"
+    [style.max-width]="maxWidth"
+    [style.max-height]="maxHeight"
+    (click)="onContentClick($event)">
+    
+    <!-- Header with title and close button -->
+    <div *ngIf="title || showCloseButton" class="flex items-center justify-between px-4 border-b border-gray-100">
+      <h3 *ngIf="title" class="text-lg font-semibold text-gray-900 truncate">
+        {{ title }}
+      </h3>
+      <div *ngIf="!title" class="flex-1"></div>
+      
+      <button 
+        *ngIf="showCloseButton"
+        (click)="close()" 
+        class="ml-4 p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 flex-shrink-0"
+        aria-label="Close popup">
+        <app-icon name="close" class="w-5 h-5 text-gray-500"></app-icon>
+      </button>
+    </div>
+    
+    <!-- Content area -->
+    <div class="p-4 rounded-lg overflow-y-auto" [style.max-height]="'calc(' + maxHeight + ' - 80px)'">
+      <ng-content></ng-content>
+    </div>
+  </div>
+</div>
