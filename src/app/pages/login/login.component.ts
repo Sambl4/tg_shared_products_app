@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { PopupComponent } from '../../components/popup/popup.component';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-login.component',
   standalone: true,
-  imports: [PopupComponent],
+  imports: [RouterLink, PopupComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })

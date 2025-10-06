@@ -26,7 +26,7 @@ export class TelegramService {
    }
 
   get MainButton(): ITgButton {
-  return this.tg.MainButton;
+    return this.tg.MainButton;
   }
 
   ready(): void {

@@ -32,6 +32,13 @@ export interface IProduct {
   id: number,
 }
 
+export interface IUser {
+  id: number;
+  name: string;
+  productListId: number;
+  productListName: string;
+}
+
 export type TNewProduct = Omit<IProduct, 'id'>;
 
 const mockData = [{
