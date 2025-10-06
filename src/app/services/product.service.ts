@@ -32,13 +32,6 @@ export interface IProduct {
   id: number,
 }
 
-export interface IUser {
-  id: number;
-  name: string;
-  productListId: number;
-  productListName: string;
-}
-
 export type TNewProduct = Omit<IProduct, 'id'>;
 
 const mockData = [{
@@ -160,6 +153,7 @@ const isTestData = false;
 })
 export class ProductService {
   private cacheService = inject(CacheService);
+  private _shouldLoad = signal(undefined as boolean | undefined);
   private _apiData = isTestData ? resource<IProduct[], unknown>({
     loader: async () => {
       const prom = new Promise((res, rej) => {
@@ -172,6 +166,7 @@ export class ProductService {
     }
   }) :
   resource<IProduct[], unknown>({
+    params: () => this._shouldLoad(),
     loader: async () => {
       const resp = await fetch(environment.apiUrl).then(res => ({
         data: res.json(),
@@ -186,7 +181,7 @@ export class ProductService {
       this.cacheService.saveToCache(CacheKeys.PRODUCTS, data);
       
       return data;
-    }
+    },
   });
 
   private _products = signal<IProduct[]>([]);
@@ -244,6 +239,10 @@ export class ProductService {
         // this.cacheService.saveToCache(data);
       }
     });
+  }
+
+  loadProducts(): void {
+    this._shouldLoad.set(true);
   }
 
   getProducts(): Signal<IProduct[]> {
