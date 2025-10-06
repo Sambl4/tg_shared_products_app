@@ -156,8 +156,8 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   private updateDraftProducts() {
-    // this.productService.updateCartList();
-    this.telegram.tg.sendData(JSON.stringify({ type: 'update', message: 'Draft products updated' }));
+    this.productService.updateCartList();
+    // this.telegram.tg.sendData(JSON.stringify({ type: 'update', message: 'Draft products updated' }));
   }
 
   private showData() {
