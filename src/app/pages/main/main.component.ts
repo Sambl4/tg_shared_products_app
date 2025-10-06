@@ -80,7 +80,7 @@ export class MainComponent implements OnInit, OnDestroy {
     private router: Router,
   ) {
     this.telegram.MainButton.setText('Update');
-    // this.telegram.MainButton.show();
+    this.telegram.MainButton.show();
     // this.telegram.MainButton.disable();
     this.updateDraftProducts = this.updateDraftProducts.bind(this);
 
@@ -155,7 +155,7 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   private updateDraftProducts() {
-    this.productService.updateCartList();
+    // this.productService.updateCartList();
     this.telegram.tg.sendData(JSON.stringify({ type: 'update', message: 'Draft products updated' }));
   }
 
