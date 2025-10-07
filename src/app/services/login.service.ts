@@ -1,5 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { TelegramService } from './telegram.service';
+import { ProductService } from './product.service';
 
 export interface IUser {
   id: number;
@@ -18,6 +19,7 @@ export interface IProductGroup {
 })
 export class LoginService {
   telegram = inject(TelegramService);
+  productService = inject(ProductService);
 
   private _isLoggedIn = signal(false);
   private _currentUser = signal<IUser | null>(null);
@@ -70,16 +72,17 @@ export class LoginService {
   }
 
   login(group: IProductGroup): void {
-    const user = this.getCurrentUser();
-    const payload = {
-      type: user ? 'update_user' : 'create_user',
-      user: {
-        ...user ? user : this.createUser(),
-        productListId: group!.id,
-        productListName: group!.name,
-      }
-    }
+    // const user = this.getCurrentUser();
+    // const payload = {
+    //   type: user ? 'update_user' : 'create_user',
+    //   user: {
+    //     ...user ? user : this.createUser(),
+    //     productListId: group!.id,
+    //     productListName: group!.name,
+    //   }
+    // }
 
-    this.telegram .tg.sendData(JSON.stringify(payload)).then((r: any) => {console.log(r.text())});
+    
+
   }
 }

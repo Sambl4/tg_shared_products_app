@@ -16,6 +16,7 @@ interface ITgButton {
 export class TelegramService {
   private window;
   tg;
+  tgWebView;
   
   constructor(
     @Inject(DOCUMENT) private _document: Document,
@@ -23,6 +24,7 @@ export class TelegramService {
   ) {
     this.window = this._document.defaultView;
     this.tg = (this.window && this.window.Telegram) ? this.window.Telegram.WebApp : null;
+this.tgWebView = (this.window && this.window.Telegram) ? this.window.Telegram.WebView : null;
    }
 
   get MainButton(): ITgButton {

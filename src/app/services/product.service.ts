@@ -216,7 +216,7 @@ export class ProductService {
   });
 
   productsByCategory = computed<TProductCategory>(() => {
-    const products = this._products();
+    const products = this._apiData.value() || [];
     return products.reduce((category: TProductCategory, product: IProduct): TProductCategory => {
       // order is id of category
       const type = product.order;
@@ -230,15 +230,6 @@ export class ProductService {
 
   constructor() {
     this.loadCachedDataIfAvailable();
-
-    effect(() => {
-      const data = this._apiData.value();
-
-      if (data) {
-        this._products.set(data);
-        // this.cacheService.saveToCache(data);
-      }
-    });
   }
 
   loadProducts(): void {
