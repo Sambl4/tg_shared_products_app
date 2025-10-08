@@ -4,10 +4,11 @@ import { TelegramService } from './services/telegram.service';
 import { LoaderComponent } from './components/loader/loader.component/loader.component';
 import { ProductService } from './services/product.service';
 import { IconComponent } from './components/icons/icons.component';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, IconComponent, LoaderComponent],
+  imports: [RouterOutlet, IconComponent, LoaderComponent, NgClass ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

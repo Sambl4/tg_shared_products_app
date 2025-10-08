@@ -1,16 +1,9 @@
 import { computed, effect, inject, Injectable, resource, ResourceStatus, Signal, signal } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { CacheKeys, CacheService } from './cache.service';
-
-// export enum ProductGroup {
-//   Electronics = 'electronics',
-//   Clothing = 'clothing',
-//   Books = 'books',
-// }
-
+import { IUser } from './login.service';
 
 export type TProductCategory = {
-  // [K in ProductGroup]: IProduct[];
   [K in string]: IProduct[];
 };
 
@@ -20,6 +13,7 @@ export interface IProductCategory {
   products: IProduct[];
   isHidden?: boolean;
 }
+
 export interface IProduct {
   title: string,
   category: string,
@@ -30,6 +24,17 @@ export interface IProduct {
   count: number,
   color: string | null,
   id: number,
+}
+
+export enum ServiceMessageType {
+  ERROR = 'error',
+  INFO = 'info',
+  SUCCESS = 'success',
+}
+
+export interface IServiceMessage {
+  type: ServiceMessageType;
+  text: string;
 }
 
 export type TNewProduct = Omit<IProduct, 'id'>;
@@ -149,10 +154,11 @@ id: 10
 const isTestData = false;
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ProductService {
   private cacheService = inject(CacheService);
+  private loginService = inject(CacheService);
   private _shouldLoad = signal(undefined as boolean | undefined);
   private _apiData = isTestData ? resource<IProduct[], unknown>({
     loader: async () => {
@@ -168,7 +174,10 @@ export class ProductService {
   resource<IProduct[], unknown>({
     params: () => this._shouldLoad(),
     loader: async () => {
-      const resp = await fetch(environment.apiUrl).then(res => ({
+      const user = this.loginService.getFromCache(CacheKeys.CURRENT_USER) as IUser;
+      const resp = await fetch(`
+        ${environment.apiUrl}?type=products&id=${user.productListId}
+      `).then(res => ({
         data: res.json(),
         status: res.ok,
       }));
@@ -177,6 +186,10 @@ export class ProductService {
         throw Error('Failed to load products');
       }
       const data = await resp.data;
+      this.setServiceMessage(
+        'Data loaded',
+        ServiceMessageType.SUCCESS,
+      )
 
       this.cacheService.saveToCache(CacheKeys.PRODUCTS, data);
       
@@ -196,7 +209,7 @@ export class ProductService {
     return isDataLoading && !hasCachedData;
   });
   error = computed(() => this._apiData.error());
-  serviceMessage = signal<string | null>(null);
+  serviceMessage = signal<IServiceMessage | null>(null);
 
   draftProductCount = computed(() => {
     const products = this._products();
@@ -216,7 +229,7 @@ export class ProductService {
   });
 
   productsByCategory = computed<TProductCategory>(() => {
-    const products = this._apiData.value() || [];
+    const products = this._products();
     return products.reduce((category: TProductCategory, product: IProduct): TProductCategory => {
       // order is id of category
       const type = product.order;
@@ -249,13 +262,17 @@ export class ProductService {
   }
 
   private loadCachedDataIfAvailable(): void {
-    const cachedData = this.cacheService.getFromCache(CacheKeys.PRODUCTS);
+    const cachedData = this.cacheService.getFromCache(CacheKeys.PRODUCTS) as IProduct[] | null;
     if (cachedData && cachedData.length > 0) {
       this._products.set(cachedData);
+      this.setServiceMessage(
+        'Cached Data',
+        ServiceMessageType.INFO
+      );
     }
   }
 
-  private resetDraftState(): void {
+  resetDraftState(): void {
     this._products.update(currentItems => currentItems.map(item => item.isDraft ? {...item, isDraft: false} : item));
   }
 
@@ -307,26 +324,42 @@ export class ProductService {
   }
 
   private updateCart(products: IProduct[]) {
-    // console.log('updateCart', products);
-    // return;
+    const user = this.loginService.getFromCache(CacheKeys.CURRENT_USER) as IUser;
+
     const options = {
       method: 'POST',
       body: JSON.stringify({
-        method:"Update",
+        method: 'Update',
         data: products,
+        id: user.productListId,
       }),
     }
 
-    this.serviceMessage.set('Updating...');
+    this.setServiceMessage('Updating...', ServiceMessageType.INFO);
+
     fetch(`${environment.apiUrl}`, options).then(async resp => {
-      // r.status === 200;
-      // if(resp.ok) {
-        this.serviceMessage.set(await resp.text());
-        // setTimeout(() => {
-        //   this.serviceMessage.set(null);
-        // }, 3000)
-      // }
+      if(resp.ok) {
+        this.setServiceMessage(await resp.text(), ServiceMessageType.SUCCESS);
+        this.resetDraftState();
+      }
     })
+  }
+
+  setServiceMessage(text: string, type: ServiceMessageType, duration = 3000): void {
+    this.serviceMessage.set({
+      text,
+      type
+    });
+
+    if (duration !== 0) {
+      setTimeout(() => {
+        this.serviceMessage.set(null);
+      }, duration);
+    }
+  }
+
+  resetServiceMessage(): void {
+    this.serviceMessage.set(null);
   }
 
   getProductsByCategoryId(categoryId: string): Signal<IProduct[]> {

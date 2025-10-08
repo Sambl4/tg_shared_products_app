@@ -7,7 +7,8 @@ import { LoginComponent } from './pages/login/login.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
-    { path: '', component: LoginComponent, pathMatch: 'full' },
+    { path: '', redirectTo: '/login', pathMatch: 'full' },
+    { path: 'login', component: LoginComponent },
     { path: 'products', component: MainComponent, canActivate: [authGuard] },
     { path: 'feedback', component: FeedbackComponent, canActivate: [authGuard] },
     { path: 'category/:id', component: CategoryComponent, canActivate: [authGuard] },

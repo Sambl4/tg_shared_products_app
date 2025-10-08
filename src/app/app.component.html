@@ -10,10 +10,11 @@
 } @else {
   
 @if (!!msg) {
-  <div class="absolute w-full flex justify-center items-center h-5 bg-green-100 border text-green-500 "
-  (click)="productService.serviceMessage.set(null)">
+  <div class="service-message absolute w-full flex justify-center items-center h-5 border "
+    ngClass="{{msg.type}}"
+    (click)="productService.resetServiceMessage()">
     <!-- <app-icon class="text-green-700" name="checkCircleFill"></app-icon> -->
-    {{ msg }}
+      {{ msg.text }}
   </div>
    <!-- <div 
     class="fixed w-[90%] top-2 left-1/2 transform -translate-x-1/2 bg-green-100 border border-green-300 text-green-700 px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2"

@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
 import { IProduct } from './product.service';
+import { IUser } from './login.service';
 
 export enum CacheKeys {
   PRODUCTS = 'tg_products_cache',
-  LOGIN_STATE = 'tg_login_state'
+  LOGIN_STATE = 'tg_login_state',
+  CURRENT_USER = 'tg_current_user',
 }
 
 @Injectable({
@@ -11,7 +13,7 @@ export enum CacheKeys {
 })
 
 export class CacheService {
-  getFromCache(key: CacheKeys): IProduct[] | null {
+  getFromCache(key: CacheKeys): IProduct[] | IUser | null {
     try {
       // Check if we're in a browser environment
       if (typeof window === 'undefined' || !window.localStorage) {

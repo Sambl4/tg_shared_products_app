@@ -1,14 +1,21 @@
 <div class="w-full h-screen flex items-center justify-center">
   <div class="tg-card p-[15%] flex flex-col gap-4">
-    {{userdata()}}
-    @if (!!selectedGroup()) {
+    @if (!loginService.currentUser()) {
+      <button class="tg-button" (click)="createUser()">Create User</button>
+    } @else if (!!selectedGroup()) {
       <div class="p-4">
         <span>Join </span>
-        <span class="font-semibold">{{ selectedGroup()!.name }}</span>
+        <span class="font-semibold">{{ selectedGroup()!.groupName }}</span>
       </div>
-      <button class="tg-button" (click)="cancelSelection()">Cancel</button>
-      <button class="tg-button" (click)="confirmSelection()">Confirm</button>
+      <button
+        class="tg-button"
+        (click)="cancelSelection()"
+        [disabled]="!isCancelAvailable">
+          Cancel
+        </button>
+      <!-- <button class="tg-button" (click)="confirmSelection()">Confirm</button> -->
     } @else {
+      <span>Hi {{ loginService.currentUser()?.name }}</span>
       <button (click)="openGroupList()" class="tg-button">
         <a class="product-edit" routerLink="/products">
           Join group
@@ -19,10 +26,14 @@
         [isOpen]="isGroupListOpen"
         (closePopup)="isGroupListOpen = false"
         [title]="'Select group'">
-          @for (group of productGroupList; track group.id) {
-            <div class="tg-card p-2 mb-2" (click)="selectGroup(group)">
-              {{ group.name }}
-            </div>
+          @if(productGroupList().length) {
+            @for (group of productGroupList(); track group.groupId) {
+              <div class="tg-card p-2 mb-2" (click)="selectGroup(group)">
+                {{ group.groupName }}
+              </div>
+            }
+          } @else {
+            Loading...
           }
       </app-popup>
       <button class="tg-button disabled">Create group</button>

@@ -6,14 +6,16 @@ import { CategoryComponent } from '../category/category.component';
 import { IconComponent } from '../../components/icons/icons.component';
 import { TogglerComponent } from '../../components/toggler/toggler.component';
 import { PopupComponent } from '../../components/popup/popup.component';
-import { NgClass } from '@angular/common';
+import { NgClass, SlicePipe } from '@angular/common';
 import { ProductListComponent } from '../../components/product-list.component/product-list.component';
+import { LoginService } from '../../services/login.service';
 
 @Component({
   selector: 'app-main',
   standalone: true,
   imports: [
     NgClass,
+    SlicePipe,
     CategoryComponent,
     IconComponent,
     ProductListComponent,
@@ -26,12 +28,18 @@ import { ProductListComponent } from '../../components/product-list.component/pr
 export class MainComponent implements OnInit, OnDestroy {
   telegram = inject(TelegramService);
   productService = inject(ProductService);
+  loginService = inject(LoginService);
   productCategories: Signal<IProductCategory[]> = computed(() => {
     const categories = this.productService.getProductsCategories();
+    const productsByCategory = this.productService.productsByCategory();
+
+    if (!categories && !productsByCategory) {
+      return [];
+    }
     return Object
       .entries(categories)
       .map(([id, category]) => {
-          const products = this.productService.productsByCategory()[id]
+          const products = productsByCategory[id]
             .filter((product: IProduct) => this.isRequiredProductList() ? !product.isDone : true);
 
           return {
@@ -144,6 +152,11 @@ export class MainComponent implements OnInit, OnDestroy {
 
   onDraftProductList() {
     this.isDraftList = !this.isDraftList;
+    this.isFilterPanel = false;
+  }
+
+  onResetDraftState() {
+    this.productService.resetDraftState();
   }
 
   // Popup demo methods
@@ -153,6 +166,10 @@ export class MainComponent implements OnInit, OnDestroy {
 
   closePopup() {
     this.isPopupOpen.set(false);
+  }
+
+  logout() {
+    this.loginService.logout();
   }
 
   private updateDraftProducts() {
