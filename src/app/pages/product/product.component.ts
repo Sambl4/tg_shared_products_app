@@ -10,16 +10,15 @@ import { ActivatedRoute, Router } from '@angular/router';
   styleUrl: './product.component.css'
 })
 export class ProductComponent {
-    product: IProduct | null;
-    constructor(
-        private productService: ProductService,
-        private telegramService: TelegramService,
-        private route: ActivatedRoute,
-        private router: Router,
-    ) {
-        const id = this.route.snapshot.paramMap.get('id') || '';
-        this.product = this.productService.getProductById(+id) || null;
-        console.log(this.product);
-    }
-
+  product: IProduct | null;
+  constructor(
+    private productService: ProductService,
+    private telegramService: TelegramService,
+    private route: ActivatedRoute,
+    private router: Router,
+  ) {
+    const id = this.route.snapshot.paramMap.get('id') || '';
+    this.product = this.productService.getProductById(+id) || null;
+    console.log(this.product);
+  }
 }

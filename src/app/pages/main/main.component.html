@@ -20,9 +20,9 @@
         (blur)="searchTerm.set(''); isSearching = false"
         [value]="searchTerm()"
         />
-         @if(searchTerm()) {
+         @if(isSearching) {
            <div
-              class="absolute inset-y-0 right-0 pr-2 flex items-center"
+              class="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-700"
               (click)="searchTerm.set('')">
                 <app-icon name="close"></app-icon>
            </div>
@@ -86,7 +86,7 @@
           <button
             (click)="onFilterCategory(category.id)"
             class="tg-button filter-btn"
-            [ngClass]="{'active': !category.isHidden}">
+            [ngClass]="{'active': !!category.isFiltered}">
               {{ category.category }}
           </button>
         }
@@ -109,7 +109,7 @@
       <app-product-list [products]="draftProducts"></app-product-list>
     } @else {
       @for(category of productCategories(); track category.id) {
-        @if(!category.isHidden) {
+        @if(!category.isHidden && !(hasFilteredCategories() && !category.isFiltered)) {
           <app-category
             [categoryName]="category.category"
             [categoryId]="category.id"

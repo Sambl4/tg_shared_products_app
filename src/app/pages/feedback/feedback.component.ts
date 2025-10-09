@@ -7,10 +7,10 @@ import { Component, signal } from '@angular/core';
   styleUrl: './feedback.component.css'
 })
 export class FeedbackComponent {
-    feedback = signal('');
+  feedback = signal('');
 
-    onFeedbackChanged(event: Event) {
-        const textarea = event.target as HTMLTextAreaElement;
-        this.feedback.set(textarea.value);
-        }
+  onFeedbackChanged(event: Event) {
+    const textarea = event.target as HTMLTextAreaElement;
+    this.feedback.set(textarea.value);
+  }
 }

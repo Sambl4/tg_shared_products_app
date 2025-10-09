@@ -22,13 +22,6 @@ export class PopupComponent {
   
   @ViewChild('popupContent', { static: false }) popupContent?: ElementRef;
 
-//   @HostListener('document:keydown.escape', ['$event'])
-//   onEscapeKey(event: KeyboardEvent) {
-//     if (this.isOpen && this.closeOnEscape) {
-//       this.close();
-//     }
-//   }
-
   onBackdropClick(event: MouseEvent) {
     if (this.closeOnOutsideClick && event.target === event.currentTarget) {
       this.close();

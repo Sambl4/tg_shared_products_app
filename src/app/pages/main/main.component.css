@@ -9,6 +9,7 @@
     @apply bg-blue-500 border border-blue-700;
   }
 
+  /* click event */
   .tg-button.active:active {
     @apply bg-blue-700 border border-blue-900;
   }

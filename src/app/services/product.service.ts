@@ -12,6 +12,7 @@ export interface IProductCategory {
   id: string;
   products: IProduct[];
   isHidden?: boolean;
+  isFiltered?: boolean;
 }
 
 export interface IProduct {
@@ -217,7 +218,6 @@ export class ProductService {
   });
 
   productCategoriesMap = computed<Record<number, string>>(() => {
-    // const products = this._apiData.value();
     const products = this._products();
     if (!products) {
       return {};
@@ -363,7 +363,6 @@ export class ProductService {
   }
 
   getProductsByCategoryId(categoryId: string): Signal<IProduct[]> {
-    // return signal(this.products().filter((product: IProduct) => product.order === +categoryId));
     return computed(() => {
       const prod = this.products();
       const filteredProd = prod.filter((product: IProduct) => product.order === +categoryId)
@@ -371,17 +370,6 @@ export class ProductService {
       return filteredProd;
     });
   }
-
-  // getProductsCategories(): IProductCategory[] {
-  //   const categoryList = Array.from(this.productCategoriesMap());
-
-  //   return categoryList.map(category => ({
-
-  //           id: category[0],
-  //           category: category[1],
-  //           products: this.productsCategory[category[0]],
-  //   }));
-  // }
 
   getProductsCategories(): Record<number, string> {
     return this.productCategoriesMap();

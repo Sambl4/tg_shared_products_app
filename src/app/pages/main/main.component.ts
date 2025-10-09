@@ -46,15 +46,16 @@ export class MainComponent implements OnInit, OnDestroy {
             id,
             category,
             products,
-            isHidden: this.filteredCategories()[id] || products.length === 0 || false
+            isHidden: products.length === 0,
+            isFiltered: !!this.filteredCategories()[id],
           };
       });
   });
+
   draftProductCount = this.productService.draftProductCount;
   searchTermProductsList = computed(() => this.productService.products()
     .filter((product: IProduct) => product.title.toLowerCase()
       .includes(this.searchTerm().toLowerCase())
-      //  && product.isDone === this.isRequiredProductList()
     )
   );
 
@@ -83,6 +84,7 @@ export class MainComponent implements OnInit, OnDestroy {
   isRequiredProductList = signal(true);
   searchTerm = model('');
   private filteredCategories = signal<Record<string, boolean>>({});
+  hasFilteredCategories = computed(() => Object.keys(this.filteredCategories()).length > 0);
 
   constructor(
     private router: Router,
@@ -142,7 +144,7 @@ export class MainComponent implements OnInit, OnDestroy {
 
   onFilterCategory(id: string) {
     this.filteredCategories.update((current) => {
-      return { ...current, [id]: !current[id] || false };
+      return { ...current, [id]: current[id] ? !current[id] : true };
     });
   }
 
@@ -174,7 +176,6 @@ export class MainComponent implements OnInit, OnDestroy {
 
   private updateDraftProducts() {
     this.productService.updateCartList();
-    // this.telegram.tg.sendData(JSON.stringify({ type: 'update', message: 'Draft products updated' }));
   }
 
   private showData() {

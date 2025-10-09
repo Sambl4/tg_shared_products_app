@@ -35,14 +35,6 @@ export class LoginService {
     this.checkExistingAuth();
   }
 
-  // login(): void {
-  //   // Implement your login logic here
-  //   this._isLoggedIn.set(true);
-    
-  //   // Optionally save to localStorage
-  //   localStorage.setItem('isLoggedIn', 'true');
-  // }
-
   logout(): void {
     this._isLoggedIn.set(false);
     localStorage.removeItem('isLoggedIn');
@@ -120,35 +112,5 @@ export class LoginService {
       this.router.navigate(['/products']);
       }
     })
-
-
-
-
-
-
-
-
-    // const options = {
-    //   method: 'POST',
-    //   body: JSON.stringify({
-    //     method: 'Update',
-    //     id: '',
-    //     data: [user],
-    //   }),
-    // }
-
-    // fetch(`${environment.apiUrl}`, options).then(async resp => {
-    //   // r.status === 200;
-    //   // if(resp.ok) {
-    //     console.log('resp', await resp);
-    //     this.router.navigate(['/products']);
-    //     // setTimeout(() => {
-    //     //   this.serviceMessage.set(null);
-    //     // }, 3000)
-    //   // }
-    // })
-
-    
-
   }
 }

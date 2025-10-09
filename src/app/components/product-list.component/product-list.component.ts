@@ -17,28 +17,16 @@ export class ProductListComponent {
 
   productService = inject(ProductService)
 
-  constructor() {
-  }
-
   ngOnInit() {
   }
 
   addToDraft(id: number) {
-    // this.productService.updateProductDraftState(id, true);
-  //   const products = this.productService.products();/
-  // const currentProduct = products.find((product) => product.id === id);
-  // if (currentProduct) {
     this.productService.updateProductDraftState(id, true);
-  // }
   }
 
   removeFromDraft(id: number) {
     this.productService.updateProductDraftState(id, false);
   }
-
-  // removeFromCart(id: number) {
-  //   this.productService.removeProductFromCart(id);
-  // }
 
   updateCartById(product: IProduct) {
     this.productService.updateCartById(product.id, !product.isDone);

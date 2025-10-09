@@ -6,13 +6,6 @@ import { environment } from '../../environments/environment';
   providedIn: 'root'
 })
 export class ProductGroupService {
-  // private productService = inject(ProductService);
-  // private productGroups: IProductGroup[] = [
-  //   { id: 1, name: 'Group A' },
-  //   { id: 2, name: 'Group B' },
-  //   { id: 3, name: 'Group C' }
-  // ];
-
   private _groups = resource<IProductGroup[], unknown>({
     loader: async () => {
       const resp = await fetch(`${environment.apiUrl}?type=groups`).then(res => ({
@@ -30,7 +23,7 @@ export class ProductGroupService {
   });
 
   private _productGroups = computed(() => this._groups.value() || []);
-  productGroups = this._productGroups;//.asReadonly();
+  productGroups = this._productGroups;
 
   getProductGroups(): Signal<IProductGroup[]> {
     return this.productGroups;

@@ -13,20 +13,12 @@ import { IconComponent } from '../../components/icons/icons.component';
   styleUrl: './category.component.css'
 })
 export class CategoryComponent implements OnInit {
-  // @Input() category: IProductCategory = { category: '', id: 0, products: [] };
   @Input() categoryName: string = '';
-  // @Input() categoryId: string = '';
   @Input() products: IProduct[] = [];
   categoryId = input<string>();
-  // isRequiredProductList = input.required<boolean>();
   private productService = inject(ProductService);
   isCategoryOpened = false;
   selectedCategoryId = signal('');
-  // categoryProducts = computed(() => {
-  //   return this.productService.products()
-  //     .filter((product: IProduct) => product.order === +this.selectedCategoryId())
-  //     .filter((product: IProduct) => this.isRequiredProductList() ? !product.isDone : true);
-  // });
   emptyListMsg = 'category is empty';
 
   ngOnInit(): void {

@@ -39,6 +39,7 @@ testem.log
 
 # Environment variables
 .env
+bot/.env
 server/.env
 /src/environments/environment.local.ts
 /src/environments/environment.prod.local.ts
