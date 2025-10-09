@@ -2,6 +2,7 @@ import { computed, effect, inject, Injectable, resource, ResourceStatus, Signal,
 import { environment } from '../../environments/environment';
 import { CacheKeys, CacheService } from './cache.service';
 import { IUser } from './login.service';
+import { HttpService, IPostPayload, PostMethods, RequestedDataType } from './http.service';
 
 export type TProductCategory = {
   [K in string]: IProduct[];
@@ -160,6 +161,7 @@ const isTestData = false;
 export class ProductService {
   private cacheService = inject(CacheService);
   private loginService = inject(CacheService);
+  private httpService = inject(HttpService);
   private _shouldLoad = signal(undefined as boolean | undefined);
   private _apiData = isTestData ? resource<IProduct[], unknown>({
     loader: async () => {
@@ -175,10 +177,12 @@ export class ProductService {
   resource<IProduct[], unknown>({
     params: () => this._shouldLoad(),
     loader: async () => {
+      // TODO move to store service
       const user = this.loginService.getFromCache(CacheKeys.CURRENT_USER) as IUser;
-      const resp = await fetch(`
-        ${environment.apiUrl}?type=products&id=${user.productListId}
-      `).then(res => ({
+      const resp = await this.httpService.get({
+        type: RequestedDataType.PRODUCTS,
+        id: user.productListId,
+      }).then(res => ({
         data: res.json(),
         status: res.ok,
       }));
@@ -326,18 +330,18 @@ export class ProductService {
   private updateCart(products: IProduct[]) {
     const user = this.loginService.getFromCache(CacheKeys.CURRENT_USER) as IUser;
 
-    const options = {
-      method: 'POST',
-      body: JSON.stringify({
-        method: 'Update',
+    const payload: IPostPayload = {
+      method: PostMethods.UPDATE,
+      body: {
         data: products,
-        id: user.productListId,
-      }),
-    }
+        id: user.productListId
+      }
+    };
 
+    // TODO move ServiceMessage to separate service
     this.setServiceMessage('Updating...', ServiceMessageType.INFO);
 
-    fetch(`${environment.apiUrl}`, options).then(async resp => {
+    this.httpService.post(payload).then(async resp => {
       if(resp.ok) {
         this.setServiceMessage(await resp.text(), ServiceMessageType.SUCCESS);
         this.resetDraftState();

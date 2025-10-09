@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { ProductListComponent } from '../../components/product-list.component/product-list.component';
 import { NgClass } from '@angular/common';
 import { IconComponent } from '../../components/icons/icons.component';
+import { AppRoutes } from '../../app.routes';
 
 @Component({
   selector: 'app-category',
@@ -16,6 +17,7 @@ export class CategoryComponent implements OnInit {
   @Input() categoryName: string = '';
   @Input() products: IProduct[] = [];
   categoryId = input<string>();
+  categoryRouterPath = AppRoutes.CATEGORY;
   private productService = inject(ProductService);
   isCategoryOpened = false;
   selectedCategoryId = signal('');

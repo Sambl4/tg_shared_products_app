@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, model, OnDestroy, OnInit, resource, Signal, signal } from '@angular/core';
 import { TelegramService } from '../../services/telegram.service';
-import { IProduct, IProductCategory, ProductService, TProductCategory } from '../../services/product.service';
+import { IProduct, IProductCategory, ProductService, ServiceMessageType, TProductCategory } from '../../services/product.service';
 import { Router } from '@angular/router';
 import { CategoryComponent } from '../category/category.component';
 import { IconComponent } from '../../components/icons/icons.component';
@@ -9,6 +9,8 @@ import { PopupComponent } from '../../components/popup/popup.component';
 import { NgClass, SlicePipe } from '@angular/common';
 import { ProductListComponent } from '../../components/product-list.component/product-list.component';
 import { LoginService } from '../../services/login.service';
+import { AppRoutes } from '../../app.routes';
+import { HttpService, IPostPayload, PostMethods } from '../../services/http.service';
 
 @Component({
   selector: 'app-main',
@@ -29,6 +31,7 @@ export class MainComponent implements OnInit, OnDestroy {
   telegram = inject(TelegramService);
   productService = inject(ProductService);
   loginService = inject(LoginService);
+  httpService = inject(HttpService);
   productCategories: Signal<IProductCategory[]> = computed(() => {
     const categories = this.productService.getProductsCategories();
     const productsByCategory = this.productService.productsByCategory();
@@ -121,7 +124,7 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   goToFeedback() {
-    this.router.navigate(['/feedback']);
+    this.router.navigate([AppRoutes.FEEDBACK]);
   }
 
   callGas() {
@@ -172,6 +175,28 @@ export class MainComponent implements OnInit, OnDestroy {
 
   logout() {
     this.loginService.logout();
+  }
+
+  notifyGroupMembers() {
+    const user = this.loginService.currentUser();
+
+    const payload: IPostPayload = {
+      method: PostMethods.NOTIFY,
+      body: {
+          data: user,
+          id: 'n/a'
+      }
+    };
+    this.closePopup()
+
+    this.httpService.post(payload).then(resp => {
+      if(resp.ok) {
+        this.productService.setServiceMessage(
+          'Group members notified',
+          ServiceMessageType.SUCCESS
+        );
+      }
+    });
   }
 
   private updateDraftProducts() {

@@ -1,17 +1,25 @@
 import { computed, inject, Injectable, resource, Signal } from '@angular/core';
-import { IProductGroup } from './login.service';
-import { environment } from '../../environments/environment';
+import { HttpService, RequestedDataType } from './http.service';
+
+export interface IProductGroup {
+  groupId: string;
+  groupName: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductGroupService {
+  private httpService = inject(HttpService);
+
   private _groups = resource<IProductGroup[], unknown>({
     loader: async () => {
-      const resp = await fetch(`${environment.apiUrl}?type=groups`).then(res => ({
-        data: res.json(),
-        status: res.ok,
-      }));
+      const resp = await this.httpService
+        .get({ type: RequestedDataType.GROUPS })
+        .then(res => ({
+          data: res.json(),
+          status: res.ok,
+        }));
 
       if(!resp.status) {
         throw Error('Failed to load products');

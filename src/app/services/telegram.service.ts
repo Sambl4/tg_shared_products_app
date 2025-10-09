@@ -24,11 +24,26 @@ export class TelegramService {
   ) {
     this.window = this._document.defaultView;
     this.tg = (this.window && this.window.Telegram) ? this.window.Telegram.WebApp : null;
-this.tgWebView = (this.window && this.window.Telegram) ? this.window.Telegram.WebView : null;
+    this.tgWebView = (this.window && this.window.Telegram) ? this.window.Telegram.WebView : null;
    }
 
   get MainButton(): ITgButton {
     return this.tg.MainButton;
+  }
+
+  getUserInfo(): {userId: number, firstName: string}{
+    const initDataUnsafe = this.tg.initDataUnsafe;
+    const user = initDataUnsafe.user;
+
+    const userId = user?.id;
+    const firstName = user?.first_name;
+
+    // extra fields that might be useful in future
+    // const lastName = user?.last_name;
+    // const username = user?.username;
+    // const languageCode = user?.language_code;
+    // const isPremium = user?.is_premium;
+    return { userId, firstName };
   }
 
   ready(): void {

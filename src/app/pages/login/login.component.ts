@@ -2,8 +2,8 @@ import { Component, effect, inject, signal } from '@angular/core';
 import { PopupComponent } from '../../components/popup/popup.component';
 import { RouterLink } from '@angular/router';
 import { TelegramService } from '../../services/telegram.service';
-import { IProductGroup, LoginService } from '../../services/login.service';
-import { ProductGroupService } from '../../services/product-group.service';
+import { LoginService } from '../../services/login.service';
+import { IProductGroup, ProductGroupService } from '../../services/product-group.service';
 import { ProductService } from '../../services/product.service';
 
 @Component({
