@@ -1,5 +1,6 @@
-import { computed, inject, Injectable, resource, Signal } from '@angular/core';
+import { computed, effect, inject, Injectable, resource, signal, Signal } from '@angular/core';
 import { HttpService, RequestedDataType } from './http.service';
+import { LoadingService } from './loading.service';
 
 export interface IProductGroup {
   groupId: string;
@@ -11,6 +12,7 @@ export interface IProductGroup {
 })
 export class ProductGroupService {
   private httpService = inject(HttpService);
+  private loadingService = inject(LoadingService);
 
   private _groups = resource<IProductGroup[], unknown>({
     loader: async () => {
@@ -25,13 +27,20 @@ export class ProductGroupService {
         throw Error('Failed to load products');
       }
       const data = await resp.data;
-      
+
+      this._productGroups.set(data);
       return data;
     },
   });
 
-  private _productGroups = computed(() => this._groups.value() || []);
+  private _productGroups = signal<IProductGroup[]>([]);
   productGroups = this._productGroups;
+
+  constructor() {
+    effect(() => {
+      this.loadingService.setLoading(this._groups.isLoading());
+    });
+  }
 
   getProductGroups(): Signal<IProductGroup[]> {
     return this.productGroups;

@@ -1,1 +1,13 @@
-<p>edit-category.component works!</p>
+<div>
+    <h2>Edit Category: {{categoriesList[+id]}}</h2>
+
+    <div>
+        @for(product of products(); track product.id) {
+            <div>{{product.title}}</div>
+        }
+    </div>
+</div>
+
+
+
+{{categoriesList | json}}

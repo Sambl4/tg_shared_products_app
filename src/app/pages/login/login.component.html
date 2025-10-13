@@ -18,7 +18,7 @@
     } @else {
       <span>Hi {{ loginService.currentUser()?.name }}</span>
       <button (click)="openGroupList()" class="tg-button">
-        <a class="product-edit" routerLink="/products">
+        <a class="product-edit" [routerLink]="`/${productsRouterPath}`">
           Join group
         </a>
       </button>
@@ -27,14 +27,10 @@
         [isOpen]="isGroupListOpen"
         (closePopup)="isGroupListOpen = false"
         [title]="'Select group'">
-          @if(productGroupList().length) {
-            @for (group of productGroupList(); track group.groupId) {
-              <div class="tg-card p-2 mb-2" (click)="selectGroup(group)">
-                {{ group.groupName }}
-              </div>
-            }
-          } @else {
-            Loading...
+          @for (group of productGroupList(); track group.groupId) {
+            <div class="tg-card p-2 mb-2" (click)="selectGroup(group)">
+              {{ group.groupName }}
+            </div>
           }
       </app-popup>
       <button class="tg-button disabled">Create group</button>

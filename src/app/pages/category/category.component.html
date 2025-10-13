@@ -4,9 +4,9 @@
       {{ categoryName }} ({{ products.length }})
     </h2>
     @if(isCategoryOpened) {
-    <!-- <a class="category-edit" [routerLink]="[`/${categoryRouterPath}`, categoryId()]"> -->
+    <a class="category-edit" [routerLink]="[`/${categoryRouterPath}`, categoryId()]">
       <app-icon class="text-gray-400" name="edit"></app-icon>
-    <!-- </a> -->
+    </a>
     }
   </div>
   @if(isCategoryOpened && !products.length) {

@@ -5,6 +5,8 @@ import { LoaderComponent } from './components/loader/loader.component/loader.com
 import { ProductService } from './services/product.service';
 import { IconComponent } from './components/icons/icons.component';
 import { NgClass } from '@angular/common';
+import { LoadingService } from './services/loading.service';
+import { MessageService } from './services/message.service';
 
 @Component({
   selector: 'app-root',
@@ -15,8 +17,8 @@ import { NgClass } from '@angular/common';
 export class AppComponent {
   protected readonly title = signal('tgApp');
   telegram = inject(TelegramService);
-  productService = inject(ProductService);
-  isLoading = signal(false);
+  loadingService = inject(LoadingService);
+  serviceMessage = inject(MessageService);
 
   constructor() {
     this.telegram.ready();

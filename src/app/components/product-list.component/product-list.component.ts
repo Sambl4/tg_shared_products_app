@@ -1,13 +1,12 @@
 import { Component, inject, input, Input } from '@angular/core';
 import { IProduct, ProductService } from '../../services/product.service';
-import { RouterLink } from '@angular/router';
 import { IconComponent } from '../icons/icons.component';
 import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [RouterLink, IconComponent, NgClass],
+  imports: [IconComponent, NgClass],
   templateUrl: './product-list.component.html',
   styleUrl: './product-list.component.css'
 })

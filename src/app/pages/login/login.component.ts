@@ -5,6 +5,7 @@ import { TelegramService } from '../../services/telegram.service';
 import { LoginService } from '../../services/login.service';
 import { IProductGroup, ProductGroupService } from '../../services/product-group.service';
 import { ProductService } from '../../services/product.service';
+import { AppRoutes } from '../../app.routes';
 
 @Component({
   selector: 'app-login.component',
@@ -23,6 +24,7 @@ export class LoginComponent {
   isGroupListOpen = false;
   isCancelAvailable = true;
   selectedGroup  = signal<IProductGroup | null>(null);
+  productsRouterPath = AppRoutes.PRODUCTS;
 
   constructor() {
     this.telegram.MainButton.setText('Join group');

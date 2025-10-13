@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { HttpService, IPostPayload, PostMethods } from './http.service';
 import { IProductGroup } from './product-group.service';
 import { AppRoutes } from '../app.routes';
+import { LoadingService } from './loading.service';
 
 export interface IUser {
   id: number;
@@ -19,6 +20,7 @@ export interface IUser {
 export class LoginService {
   private telegram = inject(TelegramService);
   private httpService = inject(HttpService);
+  private loadingService = inject(LoadingService);
   private router = inject(Router);
 
   private _isLoggedIn = signal(false);
@@ -68,8 +70,10 @@ export class LoginService {
       }
     }
 
+    this.loadingService.setLoading(true);
     this.httpService.post(payload).then(async resp => {
       if(resp.ok) {
+        this.loadingService.setLoading(false);
         this._isLoggedIn.set(true);
         localStorage.setItem('isLoggedIn', 'true');
         this.router.navigate([AppRoutes.PRODUCTS]);

@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, model, OnDestroy, OnInit, resource, Signal, signal } from '@angular/core';
 import { TelegramService } from '../../services/telegram.service';
-import { IProduct, IProductCategory, ProductService, ServiceMessageType, TProductCategory } from '../../services/product.service';
+import { IProduct, IProductCategory, ProductService } from '../../services/product.service';
 import { Router } from '@angular/router';
 import { CategoryComponent } from '../category/category.component';
 import { IconComponent } from '../../components/icons/icons.component';
@@ -11,6 +11,7 @@ import { ProductListComponent } from '../../components/product-list.component/pr
 import { LoginService } from '../../services/login.service';
 import { AppRoutes } from '../../app.routes';
 import { HttpService, IPostPayload, PostMethods } from '../../services/http.service';
+import { MessageService, ServiceMessageType } from '../../services/message.service';
 
 @Component({
   selector: 'app-main',
@@ -31,6 +32,7 @@ export class MainComponent implements OnInit, OnDestroy {
   telegram = inject(TelegramService);
   productService = inject(ProductService);
   loginService = inject(LoginService);
+  private serviceMessage = inject(MessageService);
   httpService = inject(HttpService);
   productCategories: Signal<IProductCategory[]> = computed(() => {
     const categories = this.productService.getProductsCategories();
@@ -191,7 +193,7 @@ export class MainComponent implements OnInit, OnDestroy {
 
     this.httpService.post(payload).then(resp => {
       if(resp.ok) {
-        this.productService.setServiceMessage(
+        this.serviceMessage.setServiceMessage(
           'Group members notified',
           ServiceMessageType.SUCCESS
         );

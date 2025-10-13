@@ -1,8 +1,9 @@
-import { computed, effect, inject, Injectable, resource, ResourceStatus, Signal, signal } from '@angular/core';
-import { environment } from '../../environments/environment';
+import { computed, effect, inject, Injectable, resource, Signal, signal } from '@angular/core';
 import { CacheKeys, CacheService } from './cache.service';
 import { IUser } from './login.service';
 import { HttpService, IPostPayload, PostMethods, RequestedDataType } from './http.service';
+import { LoadingService } from './loading.service';
+import { MessageService, ServiceMessageType } from './message.service';
 
 export type TProductCategory = {
   [K in string]: IProduct[];
@@ -26,17 +27,6 @@ export interface IProduct {
   count: number,
   color: string | null,
   id: number,
-}
-
-export enum ServiceMessageType {
-  ERROR = 'error',
-  INFO = 'info',
-  SUCCESS = 'success',
-}
-
-export interface IServiceMessage {
-  type: ServiceMessageType;
-  text: string;
 }
 
 export type TNewProduct = Omit<IProduct, 'id'>;
@@ -162,6 +152,8 @@ export class ProductService {
   private cacheService = inject(CacheService);
   private loginService = inject(CacheService);
   private httpService = inject(HttpService);
+  private loadingService = inject(LoadingService);
+  private messageService = inject(MessageService);
   private _shouldLoad = signal(undefined as boolean | undefined);
   private _apiData = isTestData ? resource<IProduct[], unknown>({
     loader: async () => {
@@ -191,30 +183,20 @@ export class ProductService {
         throw Error('Failed to load products');
       }
       const data = await resp.data;
-      this.setServiceMessage(
+      this.messageService.setServiceMessage(
         'Data loaded',
         ServiceMessageType.SUCCESS,
       )
 
       this.cacheService.saveToCache(CacheKeys.PRODUCTS, data);
-      
+      this._products.set(data);
+
       return data;
     },
   });
 
   private _products = signal<IProduct[]>([]);
   products = this._products.asReadonly();
-
-  isLoading = computed(() => {
-    if (isTestData) return false;
-
-    const isDataLoading = this._apiData.isLoading();
-    const hasCachedData = this._products().length > 0;
-
-    return isDataLoading && !hasCachedData;
-  });
-  error = computed(() => this._apiData.error());
-  serviceMessage = signal<IServiceMessage | null>(null);
 
   draftProductCount = computed(() => {
     const products = this._products();
@@ -247,6 +229,26 @@ export class ProductService {
 
   constructor() {
     this.loadCachedDataIfAvailable();
+
+    effect(() => {
+      let loadingState = false;
+      if (!isTestData) {
+        const isDataLoading = this._apiData.isLoading();
+        const hasCachedData = this._products().length > 0;
+
+        loadingState = isDataLoading && !hasCachedData;
+      };
+
+      this.loadingService.setLoading(loadingState)
+    });
+
+    effect(() => {
+      const error = this._apiData.error();
+
+      if(error) {
+        this.messageService.setServiceMessage(error.message, ServiceMessageType.ERROR);
+      }
+    });
   }
 
   loadProducts(): void {
@@ -269,7 +271,7 @@ export class ProductService {
     const cachedData = this.cacheService.getFromCache(CacheKeys.PRODUCTS) as IProduct[] | null;
     if (cachedData && cachedData.length > 0) {
       this._products.set(cachedData);
-      this.setServiceMessage(
+      this.messageService.setServiceMessage(
         'Cached Data',
         ServiceMessageType.INFO
       );
@@ -338,32 +340,14 @@ export class ProductService {
       }
     };
 
-    // TODO move ServiceMessage to separate service
-    this.setServiceMessage('Updating...', ServiceMessageType.INFO);
+    this.messageService.setServiceMessage('Updating...', ServiceMessageType.INFO);
 
     this.httpService.post(payload).then(async resp => {
       if(resp.ok) {
-        this.setServiceMessage(await resp.text(), ServiceMessageType.SUCCESS);
+        this.messageService.setServiceMessage(await resp.text(), ServiceMessageType.SUCCESS);
         this.resetDraftState();
       }
     })
-  }
-
-  setServiceMessage(text: string, type: ServiceMessageType, duration = 3000): void {
-    this.serviceMessage.set({
-      text,
-      type
-    });
-
-    if (duration !== 0) {
-      setTimeout(() => {
-        this.serviceMessage.set(null);
-      }, duration);
-    }
-  }
-
-  resetServiceMessage(): void {
-    this.serviceMessage.set(null);
   }
 
   getProductsByCategoryId(categoryId: string): Signal<IProduct[]> {
