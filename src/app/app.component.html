@@ -1,17 +1,17 @@
 @let msg = serviceMessage.serviceMessage();
 
-@if(loadingService.isLoading())
+@if(appStore.isLoading())
 {
   <app-loader></app-loader>
-} @else if (!!msg && msg.type === 'error') {
-  <div class="tg-card bg-red-100 border border-red-100 rounded-lg text-red-500">{{ msg.text }}</div>
+} @else if (!!msg && msg.type === 'error' || appStore.error()) {
+  <div class="tg-card bg-red-100 border border-red-100 rounded-lg text-red-500">{{ msg?.text || appStore.error() }}</div>
 } @else {
   
   @if (!!msg) {
     <!-- TODO: move msg to separate component -->
     <div class="service-message absolute w-full flex justify-center items-center h-5 border "
       ngClass="{{msg.type}}"
-      (click)="serviceMessage.resetServiceMessage()">
+      (click)="serviceMessage.resetMessage()">
       <!-- <app-icon class="text-green-700" name="checkCircleFill"></app-icon> -->
         {{ msg.text }}
     </div>

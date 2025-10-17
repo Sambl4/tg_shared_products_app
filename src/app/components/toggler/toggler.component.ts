@@ -2,8 +2,8 @@ import { Component, EventEmitter, Input, model, Output } from '@angular/core';
 
 @Component({
   selector: 'app-toggler',
-  imports: [],
   standalone: true,
+  imports: [],
   templateUrl: './toggler.component.html',
   styleUrl: './toggler.component.css'
 })

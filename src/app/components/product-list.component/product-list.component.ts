@@ -1,7 +1,10 @@
 import { Component, inject, input, Input } from '@angular/core';
-import { IProduct, ProductService } from '../../services/product.service';
+import { ProductService } from '../../services/product.service';
 import { IconComponent } from '../icons/icons.component';
 import { NgClass } from '@angular/common';
+import { IProduct } from '../../stores/with-products.store';
+import { AppStore } from '../../stores/app.store';
+import { MessageService, ServiceMessageType } from '../../services/message.service';
 
 @Component({
   selector: 'app-product-list',
@@ -14,20 +17,31 @@ export class ProductListComponent {
   @Input() categoryName: string = '';
   products = input<IProduct[]>([]);
 
-  productService = inject(ProductService)
+  private _productService = inject(ProductService)
+  private _appStore = inject(AppStore);
+  private _serviceMessage = inject(MessageService);
 
   ngOnInit() {
   }
 
   addToDraft(id: number) {
-    this.productService.updateProductDraftState(id, true);
+    this._appStore.updateProductDraftState(id, true);
   }
 
   removeFromDraft(id: number) {
-    this.productService.updateProductDraftState(id, false);
+    this._appStore.updateProductDraftState(id, false);
   }
 
   updateCartById(product: IProduct) {
-    this.productService.updateCartById(product.id, !product.isDone);
+    const productListId = this._appStore.currentUser()!.productListId;
+
+    this._serviceMessage.showMessage('Updating...', ServiceMessageType.INFO);
+    this._appStore.updateCartById(product.id, productListId)
+      .then(result => result
+        ? this._serviceMessage.showMessage('Updated', ServiceMessageType.SUCCESS)
+        : this._serviceMessage.showMessage('Update failed', ServiceMessageType.ERROR)
+      );
+    // todp show message to start update
+    // this.productService.updateCartById(product.id, !product.isDone);
   }
 }

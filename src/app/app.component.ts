@@ -7,6 +7,7 @@ import { IconComponent } from './components/icons/icons.component';
 import { NgClass } from '@angular/common';
 import { LoadingService } from './services/loading.service';
 import { MessageService } from './services/message.service';
+import { AppStore } from './stores/app.store';
 
 @Component({
   selector: 'app-root',
@@ -19,6 +20,7 @@ export class AppComponent {
   telegram = inject(TelegramService);
   loadingService = inject(LoadingService);
   serviceMessage = inject(MessageService);
+  appStore = inject(AppStore);
 
   constructor() {
     this.telegram.ready();

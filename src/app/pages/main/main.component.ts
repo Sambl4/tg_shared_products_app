@@ -1,6 +1,5 @@
-import { Component, computed, effect, inject, model, OnDestroy, OnInit, resource, Signal, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnDestroy, OnInit, Signal, signal } from '@angular/core';
 import { TelegramService } from '../../services/telegram.service';
-import { IProduct, IProductCategory, ProductService } from '../../services/product.service';
 import { Router } from '@angular/router';
 import { CategoryComponent } from '../category/category.component';
 import { IconComponent } from '../../components/icons/icons.component';
@@ -8,10 +7,12 @@ import { TogglerComponent } from '../../components/toggler/toggler.component';
 import { PopupComponent } from '../../components/popup/popup.component';
 import { NgClass, SlicePipe } from '@angular/common';
 import { ProductListComponent } from '../../components/product-list.component/product-list.component';
-import { LoginService } from '../../services/login.service';
 import { AppRoutes } from '../../app.routes';
 import { HttpService, IPostPayload, PostMethods } from '../../services/http.service';
 import { MessageService, ServiceMessageType } from '../../services/message.service';
+import { AppStore } from '../../stores/app.store';
+import { IProductCategory } from '../../stores/with-products.store';
+import { SearchComponent } from '../../components/search/search.component';
 
 @Component({
   selector: 'app-main',
@@ -24,85 +25,35 @@ import { MessageService, ServiceMessageType } from '../../services/message.servi
     ProductListComponent,
     TogglerComponent,
     PopupComponent,
+    SearchComponent,
   ],
   templateUrl: './main.component.html',
   styleUrl: './main.component.css'
 })
 export class MainComponent implements OnInit, OnDestroy {
-  telegram = inject(TelegramService);
-  productService = inject(ProductService);
-  loginService = inject(LoginService);
-  private serviceMessage = inject(MessageService);
-  httpService = inject(HttpService);
-  productCategories: Signal<IProductCategory[]> = computed(() => {
-    const categories = this.productService.getProductsCategories();
-    const productsByCategory = this.productService.productsByCategory();
+  private _telegram = inject(TelegramService);
+  private _serviceMessage = inject(MessageService);
+  private _router = inject(Router);
+  private _httpService = inject(HttpService);
+  appStore = inject(AppStore);
 
-    if (!categories && !productsByCategory) {
-      return [];
-    }
-    return Object
-      .entries(categories)
-      .map(([id, category]) => {
-          const products = productsByCategory[id]
-            .filter((product: IProduct) => this.isRequiredProductList() ? !product.isDone : true);
+  productCategories: Signal<IProductCategory[]> = this.appStore.productCategories;
+  draftProductsList = this.appStore.draftProducts;
+  searchTermProductsList = this.appStore.searchTermProductsList;
 
-          return {
-            id,
-            category,
-            products,
-            isHidden: products.length === 0,
-            isFiltered: !!this.filteredCategories()[id],
-          };
-      });
-  });
-
-  draftProductCount = this.productService.draftProductCount;
-  searchTermProductsList = computed(() => this.productService.products()
-    .filter((product: IProduct) => product.title.toLowerCase()
-      .includes(this.searchTerm().toLowerCase())
-    )
-  );
-
-  isDraftList = false;
-  
+  isTgApp = this._telegram.getIsTgApp();
+  isDraftList = false;  
   // Popup demo state
   isPopupOpen = signal(false);
-  
-  draftProductsList = computed(() => {
-    const products = this.productService.products();
-    return products.filter((prod) => prod.isDraft);
-  });
-
-  productsByCategory = computed(() => {
-    return this.productService.productsByCategory();
-      // .filter((product: IProduct) => product.order === +this.selectedCategoryId())
-      // .filter((product: IProduct) => this.isRequiredProductList() ? !product.isDone : true);
-  });
-  productsByCategoryEntries = computed(() => {
-    return Object.entries(this.productsByCategory());
-  });
-
-  isFilterPanel = false;
   isSearching = false;
   emptyListMsg = 'No products found';
-  isRequiredProductList = signal(true);
-  searchTerm = model('');
-  private filteredCategories = signal<Record<string, boolean>>({});
-  hasFilteredCategories = computed(() => Object.keys(this.filteredCategories()).length > 0);
+  isFilterPanel = false;
+  hasFilteredCategories = computed(() => Object.keys(this.appStore.filteredCategories()).length > 0);
 
-  constructor(
-    private router: Router,
-  ) {
-    this.telegram.MainButton.setText('Update');
-    this.telegram.MainButton.show();
-    // this.telegram.MainButton.disable();
+  constructor() {
+    this._telegram.MainButton.setText('Update');
+    this._telegram.MainButton.show();
     this.updateDraftProducts = this.updateDraftProducts.bind(this);
-
-    effect(() => {
-      this.searchTermProductsList();
-      this.isFilterPanel = false;
-    });
 
     effect(() => {
       const draftList = this.draftProductsList();
@@ -111,31 +62,38 @@ export class MainComponent implements OnInit, OnDestroy {
       }
 
       draftList.length ?
-        this.telegram.MainButton.show() :
-        this.telegram.MainButton.hide();
-    })
+        this._telegram.MainButton.show() :
+        this._telegram.MainButton.hide();
+    });
   }
 
   ngOnInit(): void {
-    this.productService.loadProducts();
-    this.telegram.MainButton.onClick(() => this.updateDraftProducts());
+    if (this.productCategories().length === 0) {
+      this.loadProducts();
+    }
+    this._telegram.MainButton.onClick(() => this.updateDraftProducts());
   }
 
   ngOnDestroy(): void {
-    this.telegram.MainButton.offClick(() => this.updateDraftProducts());
+    this._telegram.MainButton.offClick(() => this.updateDraftProducts());
   }
+  
+  loadProducts() {
+    this.appStore.loadCachedProducts().then(res => {
+      res ? this._serviceMessage.showMessage(
+        'Cached Data',
+        ServiceMessageType.INFO
+      ) : this._serviceMessage.showMessage(
+        'No Cached Data',
+        ServiceMessageType.ERROR
+      );
+    });
+
+    this.appStore.loadProducts();
+  };
 
   goToFeedback() {
-    this.router.navigate([AppRoutes.FEEDBACK]);
-  }
-
-  callGas() {
-    console.log();
-    this.showData();
-  }
-
-  callSpreadsheet() {
-    console.log('');
+    this._router.navigate([AppRoutes.FEEDBACK]);
   }
 
   toggleFilterPanel() {
@@ -144,17 +102,15 @@ export class MainComponent implements OnInit, OnDestroy {
 
   onRequiredTogglerChanged(event: boolean) {
     this.onResetFilter();
-    this.isRequiredProductList.update(() => event);
+    this.appStore.setIsRequiredProductList(event);
   }
 
   onFilterCategory(id: string) {
-    this.filteredCategories.update((current) => {
-      return { ...current, [id]: current[id] ? !current[id] : true };
-    });
+    this.appStore.filterByCategory(id);
   }
 
   onResetFilter() {
-    this.filteredCategories.set({});
+    this.appStore.resetCategoryFilter();
   }
 
   onDraftProductList() {
@@ -163,10 +119,25 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   onResetDraftState() {
-    this.productService.resetDraftState();
+    this.isDraftList = false;
+    this.appStore.resetDraftState();
   }
 
-  // Popup demo methods
+  onFocusToSearch() {
+    this.isSearching = true;
+    this.isFilterPanel = false;
+  }
+
+  onBlurOfSearch() {
+    this.appStore.searchProducts('');
+    this.isSearching = false;
+  }
+
+  onSearchTermChanged(term: string) {
+    this.appStore.searchProducts(term);
+  }
+
+  // TODO Popup demo methods
   openPopup() {
     this.isPopupOpen.set(true);
   }
@@ -176,11 +147,12 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   logout() {
-    this.loginService.logout();
+    this.appStore.logout();
+    this._router.navigate([AppRoutes.LOGIN]);
   }
 
   notifyGroupMembers() {
-    const user = this.loginService.currentUser();
+    const user = this.appStore.currentUser();
 
     const payload: IPostPayload = {
       method: PostMethods.NOTIFY,
@@ -191,9 +163,9 @@ export class MainComponent implements OnInit, OnDestroy {
     };
     this.closePopup()
 
-    this.httpService.post(payload).then(resp => {
+    this._httpService.post(payload).then(resp => {
       if(resp.ok) {
-        this.serviceMessage.setServiceMessage(
+        this._serviceMessage.showMessage(
           'Group members notified',
           ServiceMessageType.SUCCESS
         );
@@ -201,10 +173,14 @@ export class MainComponent implements OnInit, OnDestroy {
     });
   }
 
-  private updateDraftProducts() {
-    this.productService.updateCartList();
-  }
+  updateDraftProducts() {
+    if (this.draftProductsList().length === 0) return;
 
-  private showData() {
+    this._serviceMessage.showMessage('Updating...', ServiceMessageType.INFO);
+    this.appStore.updateCartList(this.appStore.currentUser()!.productListId)
+      .then(result => result
+        ? this._serviceMessage.showMessage('Updated', ServiceMessageType.SUCCESS)
+        : this._serviceMessage.showMessage('Update failed', ServiceMessageType.ERROR)
+      );
   }
 }

@@ -1,22 +1,20 @@
-import { computed, effect, inject, Injectable, resource, signal, Signal } from '@angular/core';
+import { inject, Injectable, resource, signal } from '@angular/core';
 import { HttpService, RequestedDataType } from './http.service';
-import { LoadingService } from './loading.service';
-
-export interface IProductGroup {
-  groupId: string;
-  groupName: string;
-}
+import { IProductGroup } from '../stores/with-products-group.store';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductGroupService {
-  private httpService = inject(HttpService);
-  private loadingService = inject(LoadingService);
+  private _httpService = inject(HttpService);
 
-  private _groups = resource<IProductGroup[], unknown>({
+  // resource params: () => undefined prevents auto loading
+  private _shouldLoad = signal<boolean | undefined>(undefined);
+
+  private _groupsResource = resource<IProductGroup[], unknown>({
+    params: () => this._shouldLoad(),
     loader: async () => {
-      const resp = await this.httpService
+      const resp = await this._httpService
         .get({ type: RequestedDataType.GROUPS })
         .then(res => ({
           data: res.json(),
@@ -28,21 +26,15 @@ export class ProductGroupService {
       }
       const data = await resp.data;
 
-      this._productGroups.set(data);
       return data;
     },
   });
 
-  private _productGroups = signal<IProductGroup[]>([]);
-  productGroups = this._productGroups;
-
-  constructor() {
-    effect(() => {
-      this.loadingService.setLoading(this._groups.isLoading());
-    });
+  getProductResource() {
+    return this._groupsResource;
   }
 
-  getProductGroups(): Signal<IProductGroup[]> {
-    return this.productGroups;
+  shouldLoadGroups(load: boolean) {
+    this._shouldLoad.set(load);
   }
 }

@@ -46,6 +46,10 @@ export class TelegramService {
     return { userId, firstName };
   }
 
+  getIsTgApp(): boolean {
+    return this.tg.platform !== 'unknown';
+  }
+
   ready(): void {
     this.tg.ready();
   }

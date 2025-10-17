@@ -1,33 +1,18 @@
 <div class="main-container p-6 flex flex-col justify-between gap-4">
   <div class="flex flex-row gap-[25px]">
-    <!-- search section -->
-    <div class="relative  "
+    <app-search 
       [ngClass]="{
         'w-[10%]': !isSearching,
         'duration-200': !isSearching,
         'w-full': isSearching,
         'duration-700': isSearching,
-        }">
-      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <app-icon name="search"></app-icon>
-      </div>
-      <input
-        type="text"
-        class="w-full text-gray-900 pl-10 pr-1 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-        placeholder="Search"
-        (input)="searchTerm.set($event.target.value)"
-        (focus)="isSearching = true"
-        (blur)="searchTerm.set(''); isSearching = false"
-        [value]="searchTerm()"
-        />
-         @if(isSearching) {
-           <div
-              class="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-700"
-              (click)="searchTerm.set('')">
-                <app-icon name="close"></app-icon>
-           </div>
-         }
-    </div>
+        }"
+      placeholder="Search..."
+      iconName="search"
+      (onBlur)="onBlurOfSearch()"
+      (onFocus)="onFocusToSearch()"
+      (onSearchTermChanged)="onSearchTermChanged($event)">
+    </app-search>
 
     <!-- action buttons section -->
     @if(!isSearching) {
@@ -51,9 +36,8 @@
           <div class="right-slot w-full flex gap-4 justify-end">
             <app-toggler
               class="rotate-90"
-              [isChecked]="isRequiredProductList()"
-              (checkedChange)="onRequiredTogglerChanged($event)"
-              [disabled]="!!searchTerm()">
+              [isChecked]="appStore.isRequiredProductList()"
+              (checkedChange)="onRequiredTogglerChanged($event)">
             </app-toggler>
             <button
               (click)="toggleFilterPanel()"
@@ -65,7 +49,7 @@
               class="w-11 h-11 border border-gray-300 rounded-[50%] p-2"
               (click)="openPopup()">
                 <!-- <app-icon name="gear"></app-icon> -->
-                 <span class="bold">{{ loginService.currentUser()?.name | slice:0:2 }}</span>
+                 <span class="bold">{{ appStore.currentUser()?.name | slice:0:2 }}</span>
             </button>
           </div>
         } @else {
@@ -99,7 +83,7 @@
     @let searchedProducts = searchTermProductsList();
     @let draftProducts = draftProductsList();
 
-    @if(searchTerm()) {
+    @if(isSearching) {
       @if(searchedProducts.length) {
         <app-product-list [products]="searchedProducts"></app-product-list>
       } @else {
@@ -119,7 +103,9 @@
       }
     }
   </div>
-
+  @if(!isTgApp && draftProductsList().length) {
+    <button class="tg-button" (click)="updateDraftProducts()">Update draft list</button>
+  }
 </div>
 
 <!-- Popup Demo -->

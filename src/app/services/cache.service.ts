@@ -1,6 +1,4 @@
 import { Injectable } from '@angular/core';
-import { IProduct } from './product.service';
-import { IUser } from './login.service';
 
 export enum CacheKeys {
   PRODUCTS = 'tg_products_cache',
@@ -13,7 +11,7 @@ export enum CacheKeys {
 })
 
 export class CacheService {
-  getFromCache(key: CacheKeys): IProduct[] | IUser | null {
+  getFromCache(key: CacheKeys): any {
     try {
       // Check if we're in a browser environment
       if (typeof window === 'undefined' || !window.localStorage) {
@@ -35,7 +33,7 @@ export class CacheService {
     }
   }
 
-  saveToCache(key: CacheKeys,data: IProduct[]): void {
+  saveToCache(key: CacheKeys, data: any): void {
     try {
       if (typeof window === 'undefined' || !window.localStorage) {
         console.warn('localStorage not available in this environment');
@@ -43,7 +41,6 @@ export class CacheService {
       }
 
       localStorage.setItem(key, JSON.stringify(data));
-      console.log('Data cached in Telegram Mini App storage');
       
     } catch (error) {
       console.warn('Failed to cache data in Telegram storage:', error);
@@ -59,7 +56,6 @@ export class CacheService {
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
         localStorage.removeItem(key);
-        console.log('Cache cleared from Telegram storage');
       }
     } catch (error) {
       console.warn('Error clearing cache:', error);

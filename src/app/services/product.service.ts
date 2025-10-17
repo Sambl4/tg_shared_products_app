@@ -4,32 +4,34 @@ import { IUser } from './login.service';
 import { HttpService, IPostPayload, PostMethods, RequestedDataType } from './http.service';
 import { LoadingService } from './loading.service';
 import { MessageService, ServiceMessageType } from './message.service';
+import { AppStore } from '../stores/app.store';
+import { IProduct, TProductCategory } from '../stores/with-products.store';
 
-export type TProductCategory = {
-  [K in string]: IProduct[];
-};
+// export type TProductCategory = {
+//   [K in string]: IProduct[];
+// };
 
-export interface IProductCategory {
-  category: string;
-  id: string;
-  products: IProduct[];
-  isHidden?: boolean;
-  isFiltered?: boolean;
-}
+// export interface IProductCategory {
+//   category: string;
+//   id: string;
+//   products: IProduct[];
+//   isHidden?: boolean;
+//   isFiltered?: boolean;
+// }
 
-export interface IProduct {
-  title: string,
-  category: string,
-  order: number,
-  isChecked: Boolean,
-  isDone: Boolean,
-  isDraft: Boolean,
-  count: number,
-  color: string | null,
-  id: number,
-}
+// export interface IProduct {
+//   title: string,
+//   category: string,
+//   order: number,
+//   isChecked: Boolean,
+//   isDone: Boolean,
+//   isDraft: Boolean,
+//   count: number,
+//   color: string | null,
+//   id: number,
+// }
 
-export type TNewProduct = Omit<IProduct, 'id'>;
+// export type TNewProduct = Omit<IProduct, 'id'>;
 
 const mockData = [{
 title: 'item - a1',
@@ -149,13 +151,15 @@ const isTestData = false;
   providedIn: 'root',
 })
 export class ProductService {
-  private cacheService = inject(CacheService);
-  private loginService = inject(CacheService);
-  private httpService = inject(HttpService);
-  private loadingService = inject(LoadingService);
-  private messageService = inject(MessageService);
+  private _cacheService = inject(CacheService);
+  private _loginService = inject(CacheService);
+  private _httpService = inject(HttpService);
+  private _loadingService = inject(LoadingService);
+  private _messageService = inject(MessageService);
+  // private appStateService = inject(AppStore);
   private _shouldLoad = signal(undefined as boolean | undefined);
-  private _apiData = isTestData ? resource<IProduct[], unknown>({
+  private _productsResource = isTestData ?
+   resource<IProduct[], unknown>({
     loader: async () => {
       const prom = new Promise((res, rej) => {
         setTimeout(()=>res(mockData),1000)
@@ -170,8 +174,8 @@ export class ProductService {
     params: () => this._shouldLoad(),
     loader: async () => {
       // TODO move to store service
-      const user = this.loginService.getFromCache(CacheKeys.CURRENT_USER) as IUser;
-      const resp = await this.httpService.get({
+      const user = this._loginService.getFromCache(CacheKeys.CURRENT_USER) as IUser;
+      const resp = await this._httpService.get({
         type: RequestedDataType.PRODUCTS,
         id: user.productListId,
       }).then(res => ({
@@ -183,17 +187,23 @@ export class ProductService {
         throw Error('Failed to load products');
       }
       const data = await resp.data;
-      this.messageService.setServiceMessage(
+      this._messageService.showMessage(
         'Data loaded',
         ServiceMessageType.SUCCESS,
       )
 
-      this.cacheService.saveToCache(CacheKeys.PRODUCTS, data);
-      this._products.set(data);
-
+      this._cacheService.saveToCache(CacheKeys.PRODUCTS, data);
       return data;
     },
   });
+
+  getProductResource() {
+    return this._productsResource;
+  }
+
+  shouldLoadProducts(load: boolean) {
+    this._shouldLoad.set(load);
+  }
 
   private _products = signal<IProduct[]>([]);
   products = this._products.asReadonly();
@@ -228,26 +238,13 @@ export class ProductService {
   });
 
   constructor() {
-    this.loadCachedDataIfAvailable();
-
     effect(() => {
       let loadingState = false;
       if (!isTestData) {
-        const isDataLoading = this._apiData.isLoading();
         const hasCachedData = this._products().length > 0;
-
-        loadingState = isDataLoading && !hasCachedData;
       };
 
-      this.loadingService.setLoading(loadingState)
-    });
-
-    effect(() => {
-      const error = this._apiData.error();
-
-      if(error) {
-        this.messageService.setServiceMessage(error.message, ServiceMessageType.ERROR);
-      }
+      this._loadingService.setLoading(loadingState)
     });
   }
 
@@ -268,86 +265,76 @@ export class ProductService {
   }
 
   private loadCachedDataIfAvailable(): void {
-    const cachedData = this.cacheService.getFromCache(CacheKeys.PRODUCTS) as IProduct[] | null;
+    const cachedData = this._cacheService.getFromCache(CacheKeys.PRODUCTS) as IProduct[] | null;
     if (cachedData && cachedData.length > 0) {
       this._products.set(cachedData);
-      this.messageService.setServiceMessage(
+      this._messageService.showMessage(
         'Cached Data',
         ServiceMessageType.INFO
       );
     }
   }
 
-  resetDraftState(): void {
-    this._products.update(currentItems => currentItems.map(item => item.isDraft ? {...item, isDraft: false} : item));
+  async updateProductData(products: IProduct[], productListId: string) {
+    return this.updateCart(products, productListId);
   }
 
-  updateCartById(id: number, newStatus: boolean) {
-    let updatedProduct: IProduct | undefined;
+  async deleteProducts(products: IProduct[], productListId: string) {
+    const payload: IPostPayload = {
+      method: PostMethods.DELETE,
+      body: {
+        data: products,
+        id: productListId
+      }
+    };
 
-    this._products.update(currentItems => currentItems
-      .map(item => {
-        if (item.id === id) {
-          updatedProduct = {
-            ...item,
-            isDone: newStatus,
-            isDraft: false,
-          };
-          return updatedProduct;
-        } else {
-          return item;
-        }
-      })
-    );
-
-    if(updatedProduct) {
-      this.updateCart([updatedProduct]);
-    }
+    return this._httpService
+      .post(payload)
+      .then(resp => resp)
+      .catch(() => false);
   }
 
-  updateCartList() {
-    let updatedProducts: IProduct[] = [];
+  async createNewProducts(products: IProduct[], productListId: string) {
+    const payload: IPostPayload = {
+      method: PostMethods.CREATE,
+      body: {
+        data: products,
+        id: productListId
+      }
+    };
 
-    const products = this._products.update(currentItems => currentItems
-      .map(item => {
-        if (item.isDraft) {
-          const product = {
-            ...item,
-            isDone: !item.isDone,
-            isDraft: false,
-          }
-
-          updatedProducts.push(product);
-          return product;
-        } else {
-          return item;
-        }
-      }));
-
-    if(updatedProducts.length) {
-      this.updateCart(updatedProducts);
-    }
+    return this._httpService
+      .post(payload)
+      .then(resp => resp)
+      .catch(() => false);
   }
 
-  private updateCart(products: IProduct[]) {
-    const user = this.loginService.getFromCache(CacheKeys.CURRENT_USER) as IUser;
+  async updateCartById(product: IProduct, productListId: string) {
+    return this.updateCart([product], productListId);
 
+  }
+
+  async updateCartList(products: IProduct[], productListId: string) {
+    return this.updateCart(products, productListId);
+  }
+
+  private async updateCart(products: IProduct[], productListId: string) {
     const payload: IPostPayload = {
       method: PostMethods.UPDATE,
       body: {
         data: products,
-        id: user.productListId
+        id: productListId
       }
     };
 
-    this.messageService.setServiceMessage('Updating...', ServiceMessageType.INFO);
 
-    this.httpService.post(payload).then(async resp => {
-      if(resp.ok) {
-        this.messageService.setServiceMessage(await resp.text(), ServiceMessageType.SUCCESS);
-        this.resetDraftState();
-      }
-    })
+    // return new Promise((resolve) => {
+    //   setTimeout(() => resolve(true), 1000);
+    // })
+    return this._httpService
+      .post(payload)
+      .then(resp => resp)
+      .catch(() => false);
   }
 
   getProductsByCategoryId(categoryId: string): Signal<IProduct[]> {

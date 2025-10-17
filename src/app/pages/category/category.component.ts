@@ -1,10 +1,12 @@
 import { Component, computed, inject, input, Input, OnInit, Signal, signal } from '@angular/core';
-import { IProduct, IProductCategory, ProductService } from '../../services/product.service';
+import { ProductService } from '../../services/product.service';
 import { RouterLink } from '@angular/router';
 import { ProductListComponent } from '../../components/product-list.component/product-list.component';
 import { NgClass } from '@angular/common';
 import { IconComponent } from '../../components/icons/icons.component';
 import { AppRoutes } from '../../app.routes';
+import { IProduct } from '../../stores/with-products.store';
+import { AppStore } from '../../stores/app.store';
 
 @Component({
   selector: 'app-category',
@@ -18,7 +20,8 @@ export class CategoryComponent implements OnInit {
   @Input() products: IProduct[] = [];
   categoryId = input<string>();
   categoryRouterPath = AppRoutes.CATEGORY;
-  private productService = inject(ProductService);
+  private _productService = inject(ProductService);
+  private _appStore = inject(AppStore);
   isCategoryOpened = false;
   selectedCategoryId = signal('');
   emptyListMsg = 'category is empty';

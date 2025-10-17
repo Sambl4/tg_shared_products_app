@@ -1,6 +1,6 @@
 <div class="w-full h-screen flex items-center justify-center">
   <div class="tg-card p-[15%] flex flex-col gap-4">
-    @if (!loginService.currentUser()) {
+    @if (!appStore.currentUser()) {
       <button class="tg-button" (click)="createUser()">Create User</button>
     } @else if (!!selectedGroup()) {
       <div class="p-4">
@@ -14,20 +14,20 @@
           Cancel
         </button>
         <!-- login button for dev mode -->
-      <!-- <button class="tg-button" (click)="confirmSelection()">Confirm</button> -->
+        @if (!isTgApp) {
+          <button class="tg-button" (click)="confirmSelection()">Confirm</button>
+        }
     } @else {
-      <span>Hi {{ loginService.currentUser()?.name }}</span>
+      <span>Hi {{ appStore.currentUser()?.name }}</span>
       <button (click)="openGroupList()" class="tg-button">
-        <a class="product-edit" [routerLink]="`/${productsRouterPath}`">
-          Join group
-        </a>
+        Join group
       </button>
       
       <app-popup
         [isOpen]="isGroupListOpen"
         (closePopup)="isGroupListOpen = false"
         [title]="'Select group'">
-          @for (group of productGroupList(); track group.groupId) {
+          @for (group of appStore.productGroups(); track group.groupId) {
             <div class="tg-card p-2 mb-2" (click)="selectGroup(group)">
               {{ group.groupName }}
             </div>

@@ -17,7 +17,7 @@ export interface IServiceMessage {
 export class MessageService {
   serviceMessage = signal<IServiceMessage | null>(null);
 
-  setServiceMessage(text: string, type: ServiceMessageType, duration = 3000): void {
+  showMessage(text: string, type: ServiceMessageType, duration = 3000): void {
     this.serviceMessage.set({
       text,
       type
@@ -30,7 +30,7 @@ export class MessageService {
     }
   }
 
-  resetServiceMessage(): void {
+  resetMessage(): void {
     this.serviceMessage.set(null);
   }
 }

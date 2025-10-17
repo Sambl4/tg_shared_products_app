@@ -24,14 +24,14 @@ export class IconComponent {
   @Input() className: string = '';
 
   constructor(
-    private iconService: IconService,
-    private sanitizer: DomSanitizer
+    private _iconService: IconService,
+    private _sanitizer: DomSanitizer
   ) {}
 
   get iconSvg(): SafeHtml {
-    const svg = this.iconService.getIcon(this.name);
+    const svg = this._iconService.getIcon(this.name);
     // Replace size classes with the provided size
     const updatedSvg = svg.replace(/class="w-\d+ h-\d+"/, `class="${this.size}"`);
-    return this.sanitizer.bypassSecurityTrustHtml(updatedSvg);
+    return this._sanitizer.bypassSecurityTrustHtml(updatedSvg);
   }
 }
