@@ -276,6 +276,7 @@ export class EditCategoryComponent implements OnInit {
 
   onRevertChanges() {
     this.newProductList = [];
+    this.newProductsCount.set(this.newProductList.length);
     this.deletedProductList = [];
     this.editedProductList = [];
     this.draftCategory.set(JSON.parse(JSON.stringify(this.currentCategory())));
@@ -283,4 +284,3 @@ export class EditCategoryComponent implements OnInit {
     this.onCancelEdit();
   }
 }
-    
