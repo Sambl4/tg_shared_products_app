@@ -28,6 +28,7 @@ export class SearchComponent {
 
   onBlurOfSearch() {
     if(this.closeOnOutsideClick) {
+      this.searchTerm.set('');
       this.isSearching = false;
       this.onBlur.emit();
     };
