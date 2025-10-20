@@ -31,6 +31,10 @@ export class TelegramService {
     return this.tg.MainButton;
   }
 
+  get BackButton(): ITgButton {
+    return this.tg.BackButton;
+  }
+
   getUserInfo(): {userId: number, firstName: string}{
     const initDataUnsafe = this.tg.initDataUnsafe;
     const user = initDataUnsafe.user;

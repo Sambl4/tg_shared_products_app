@@ -105,6 +105,7 @@ export class EditCategoryComponent implements OnInit {
   constructor() {
     this._telegram.MainButton.setText('Save changes');
     this.onSaveChanges = this.onSaveChanges.bind(this);
+    this.navigateBack = this.navigateBack.bind(this);
 
     effect(() => {
       this.isAvailableToSaveChanges() ?
@@ -115,10 +116,12 @@ export class EditCategoryComponent implements OnInit {
 
   ngOnInit(): void {
     this._telegram.MainButton.onClick(() => this.onSaveChanges());
+    this._telegram.BackButton.onClick(() => this.navigateBack());
   }
 
   ngOnDestroy(): void {
     this._telegram.MainButton.offClick(() => this.onSaveChanges());
+    this._telegram.BackButton.offClick(() => this.navigateBack());
   }
 
   editCategoryName() {
@@ -237,11 +240,11 @@ export class EditCategoryComponent implements OnInit {
     if(this.editedProductList.length > 0) {
       this._messageService.showMessage('Updating product data', ServiceMessageType.INFO);
       this._appStore.updateProductsData(this.editedProductList, productListId)
-        .then( async res => {
-          if(typeof res === 'object' && res.ok) {
-            this._messageService.showMessage(await res.text(), ServiceMessageType.SUCCESS);
+        .then( res => {
+          if(res.status) {
+            this._messageService.showMessage(res.text, ServiceMessageType.SUCCESS);
           } else {
-            this._messageService.showMessage('Products update failed', ServiceMessageType.ERROR);
+            this._messageService.showMessage(res.text, ServiceMessageType.ERROR);
           }
         }
       );
@@ -259,11 +262,11 @@ export class EditCategoryComponent implements OnInit {
     if(this.deletedProductList.length > 0) {
       this._messageService.showMessage('Deleting products', ServiceMessageType.INFO);
       this._appStore.deleteProducts(this.deletedProductList, productListId)
-        .then( async res => {
-          if(typeof res === 'object' && res.ok) {
-            this._messageService.showMessage(await res.text(), ServiceMessageType.SUCCESS);
+        .then( res => {
+          if(res.status) {
+            this._messageService.showMessage(res.text, ServiceMessageType.SUCCESS);
           } else {
-            this._messageService.showMessage('Products creation failed', ServiceMessageType.ERROR);
+            this._messageService.showMessage(res.text, ServiceMessageType.ERROR);
           }
         }
       );
@@ -282,5 +285,9 @@ export class EditCategoryComponent implements OnInit {
     this.draftCategory.set(JSON.parse(JSON.stringify(this.currentCategory())));
 
     this.onCancelEdit();
+  }
+
+  navigateBack() {
+    window.history.back();
   }
 }

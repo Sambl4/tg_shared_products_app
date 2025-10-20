@@ -1,4 +1,4 @@
-import { Component, Input, model, output } from '@angular/core';
+import { Component, Input, model, OnDestroy, OnInit, output } from '@angular/core';
 import { IconComponent } from '../icons/icons.component';
 
 @Component({
@@ -8,7 +8,7 @@ import { IconComponent } from '../icons/icons.component';
   templateUrl: './search.component.html',
   styleUrl: './search.component.css'
 })
-export class SearchComponent {
+export class SearchComponent implements OnInit, OnDestroy {
   @Input() placeholder: string = '';
   @Input() iconName: string = '';
   @Input() initialValue: string = '';
@@ -24,6 +24,16 @@ export class SearchComponent {
   onFocusToSearch() {
     this.isSearching = true;
     this.onFocus.emit();
+  }
+
+  ngOnInit() {
+    console.log(this.searchTerm());
+  }
+
+  ngOnDestroy() {
+    this.searchTerm.set('');
+    this.isSearching = false;
+    this.onClose.emit();
   }
 
   onBlurOfSearch() {

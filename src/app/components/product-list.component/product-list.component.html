@@ -19,7 +19,8 @@
     </div>
     <div
       class="product-title"
-      [ngClass]="{'text-orange-500': product.isDraft}">
+      [ngClass]="{'text-orange-500': product.isDraft}"
+      (click)="goToProductCategory(product.order)">
       {{product.title}}
     </div>
       <app-icon (click)="updateCartById(product)" name="update"></app-icon>

@@ -36,7 +36,8 @@ interface IProductsState {
   products: IProduct[];
   productCategoryIdToNameMap: Record<number, string>;
 
-  productCategories: Record<string, TProductCategory>;
+  // productCategories: Record<string, TProductCategory>;
+  productCategories: IProductCategory[];
   isRequiredProductList: boolean;
   filteredCategories: Record<string, boolean>;
   categoryIdToProductsList: Record<string, IProduct[]>;
@@ -49,7 +50,7 @@ const initialProductsState: IProductsState = {
   error: null,
   products: [],
   productCategoryIdToNameMap: {},
-  productCategories: {},
+  productCategories: [],
   categoryIdToProductsList: {},
   isRequiredProductList: true,
   filteredCategories: {},
@@ -63,9 +64,11 @@ export const withProductsStore = function() {
     withProps(() => {
       const productService = inject(ProductService);
       const resource = productService.getProductResource();
+      const searchTerm = '';
       return {
         _shouldLoad: signal<boolean>(false),
         _resource: resource,
+        _searchTerm: signal<string>(searchTerm),
       };
     }),
     withMethods(( store ) => {
@@ -135,30 +138,58 @@ export const withProductsStore = function() {
           return productService.updateCartById(updatedProduct, productListId);
         },
         async updateProductsData(products: IProduct[], productListId: string) {
-          return productService.updateProductData(products, productListId);
+          return productService.updateProductData(products, productListId)
+            .then( async res => {
+              if(typeof res === 'object' && res.ok) {
+                  store._resource.reload();
+                  return {
+                    status: await res.ok,
+                    text: await res.text()
+                  };
+              } else {
+                return {
+                    status: false,
+                    text: 'Products data update failed',
+                  };
+              }
+            });
         },
         async deleteProducts(products: IProduct[], productListId: string) {
-          return productService.deleteProducts(products, productListId);
+          return productService.deleteProducts(products, productListId)
+            .then( async res => {
+              if(typeof res === 'object' && res.ok) {
+                  store._resource.reload();
+                  return {
+                    status: await res.ok,
+                    text: await res.text()
+                  };
+              } else {
+                return {
+                    status: false,
+                    text: 'Products deletion failed',
+                  };
+              }
+            });
         },
         async createNewProducts(products: IProduct[], productListId: string) {
           return productService.createNewProducts(products, productListId)
-          .then( async res => {
-            if(typeof res === 'object' && res.ok) {
-                store._resource.reload();
+            .then( async res => {
+              if(typeof res === 'object' && res.ok) {
+                  store._resource.reload();
+                  return {
+                    status: await res.ok,
+                    text: await res.text()
+                  };
+              } else {
                 return {
-                  status: await res.ok,
-                  text: await res.text()
-                };
-            } else {
-              return {
-                  status: false,
-                  text: 'Products creation failed',
-                };
-            }
-          });
+                    status: false,
+                    text: 'Products creation failed',
+                  };
+              }
+            });
         },
         updateCategoryName(categoryId: number, newCategoryName: string) {
-          
+          // TODO implement category name update
 
         },
         setIsRequiredProductList(state: boolean) {
@@ -181,11 +212,7 @@ export const withProductsStore = function() {
           });
         },
         searchProducts(term: string) {
-          const searchTermProductsList = store.products().filter((product: IProduct) =>
-            product.title.toLowerCase().includes(term.toLowerCase()
-          ));
-
-          patchState(store, { searchTermProductsList });
+          store._searchTerm.set(term);
         },
         filterByCategory(categoryId: string) {
           const currentFilters = store.filteredCategories();
@@ -207,7 +234,8 @@ export const withProductsStore = function() {
       isRequiredProductList,
       filteredCategories,
       _shouldLoad,
-      _resource
+      _resource,
+      _searchTerm,
     }) => {
       const isLoading = computed(() => _shouldLoad() && _resource.isLoading());
       const loadedProducts = computed(() => _shouldLoad() && _resource.value() || []);
@@ -217,7 +245,7 @@ export const withProductsStore = function() {
         const _loadedProducts = loadedProducts();
         const _cachedProducts = untracked(() => products());
         const productsToUse = _loadedProducts.length > 0 ? _loadedProducts : _cachedProducts;
-        if (!productsToUse) {
+        if (!productsToUse.length) {
           return {};
         }
         return productsToUse.reduce((acc, product) => {
@@ -227,8 +255,9 @@ export const withProductsStore = function() {
       });
 
       const categoryIdToProductsList = computed<Record<string, IProduct[]>>(() => {
-        const _products = products();
-        return _products.reduce((category: Record<string, IProduct[]>, product: IProduct): Record<string, IProduct[]> => {
+        // const _products = products();
+        const _loadedProducts = loadedProducts();
+        return _loadedProducts.reduce((category: Record<string, IProduct[]>, product: IProduct): Record<string, IProduct[]> => {
           // order is id of category
           const type = product.order;
           if (!category[type]) {
@@ -249,8 +278,8 @@ export const withProductsStore = function() {
         return Object
           .entries(categoryIdToName)
           .map(([id, category]) => {
-              const products = categoryIdToProducts[id]
-                .filter((product: IProduct) => isRequiredProductList() ? !product.isDone : true);
+              const allProducts = categoryIdToProducts[id] || [];
+              const products = allProducts.filter((product: IProduct) => isRequiredProductList() ? !product.isDone : true);
 
               return {
                 id,
@@ -261,12 +290,21 @@ export const withProductsStore = function() {
               };
           });
       });
+
+      const searchTermProductsList = computed(() => {
+        const products = loadedProducts();
+        const term = _searchTerm();
+        return products.filter((product: IProduct) =>
+            product.title.toLowerCase().includes(term.toLowerCase()
+          ));
+      }); 
       
       return {
         isLoading,
         products: loadedProducts,
         productCategoryIdToNameMap,
         categoryIdToProductsList,
+        searchTermProductsList,
         error,
         productCategories,
       }

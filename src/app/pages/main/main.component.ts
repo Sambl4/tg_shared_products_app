@@ -5,7 +5,7 @@ import { CategoryComponent } from '../category/category.component';
 import { IconComponent } from '../../components/icons/icons.component';
 import { TogglerComponent } from '../../components/toggler/toggler.component';
 import { PopupComponent } from '../../components/popup/popup.component';
-import { NgClass, SlicePipe } from '@angular/common';
+import { JsonPipe, NgClass, SlicePipe } from '@angular/common';
 import { ProductListComponent } from '../../components/product-list.component/product-list.component';
 import { AppRoutes } from '../../app.routes';
 import { HttpService, IPostPayload, PostMethods } from '../../services/http.service';
@@ -18,6 +18,7 @@ import { SearchComponent } from '../../components/search/search.component';
   selector: 'app-main',
   standalone: true,
   imports: [
+    JsonPipe,
     NgClass,
     SlicePipe,
     CategoryComponent,
@@ -37,7 +38,7 @@ export class MainComponent implements OnInit, OnDestroy {
   private _httpService = inject(HttpService);
   appStore = inject(AppStore);
 
-  productCategories: Signal<IProductCategory[]> = this.appStore.productCategories;
+  // productCategories: Signal<IProductCategory[]> = this.appStore.productCategories;
   draftProductsList = this.appStore.draftProducts;
   searchTermProductsList = this.appStore.searchTermProductsList;
 
@@ -68,7 +69,7 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (this.productCategories().length === 0) {
+    if (this.appStore.productCategories.length === 0) {
       this.loadProducts();
     }
     this._telegram.MainButton.onClick(() => this.updateDraftProducts());
@@ -128,7 +129,7 @@ export class MainComponent implements OnInit, OnDestroy {
     this.isFilterPanel = false;
   }
 
-  onBlurOfSearch() {
+  onCloseOfSearch() {
     this.appStore.searchProducts('');
     this.isSearching = false;
   }
@@ -158,10 +159,15 @@ export class MainComponent implements OnInit, OnDestroy {
       method: PostMethods.NOTIFY,
       body: {
           data: user,
-          id: 'n/a'
+          id: 'Sheet0'
       }
     };
     this.closePopup()
+
+    this._serviceMessage.showMessage(
+      'Notifying group members...',
+      ServiceMessageType.INFO
+    );
 
     this._httpService.post(payload).then(resp => {
       if(resp.ok) {
@@ -170,7 +176,12 @@ export class MainComponent implements OnInit, OnDestroy {
           ServiceMessageType.SUCCESS
         );
       }
-    });
+    })
+    .catch(async resp => 
+      this._serviceMessage.showMessage(
+          `Group notification failed: ${await resp.message}`,
+          ServiceMessageType.ERROR
+        ));
   }
 
   updateDraftProducts() {

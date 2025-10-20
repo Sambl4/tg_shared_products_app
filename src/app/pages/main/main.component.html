@@ -9,7 +9,8 @@
         }"
       placeholder="Search..."
       iconName="search"
-      (onBlur)="onBlurOfSearch()"
+      [closeOnOutsideClick]="false"
+      (onClose)="onCloseOfSearch()"
       (onFocus)="onFocusToSearch()"
       (onSearchTermChanged)="onSearchTermChanged($event)">
     </app-search>
@@ -65,7 +66,7 @@
           class="tg-button filter-btn">
             All
         </button>
-      @for(category of productCategories(); track category.id) {
+      @for(category of appStore.productCategories(); track category.id) {
         @if (category.products.length) {
           <button
             (click)="onFilterCategory(category.id)"
@@ -82,9 +83,11 @@
   <div class="main-container-content flex flex-col">
     @let searchedProducts = searchTermProductsList();
     @let draftProducts = draftProductsList();
+    @let productCategories = appStore.productCategories();
 
     @if(isSearching) {
       @if(searchedProducts.length) {
+        {{searchedProducts | json}}
         <app-product-list [products]="searchedProducts"></app-product-list>
       } @else {
         <div class="p-2 text-red-300 mx-auto">{{ emptyListMsg }}</div>
@@ -92,13 +95,18 @@
     } @else if(draftProducts.length && isDraftList) {
       <app-product-list [products]="draftProducts"></app-product-list>
     } @else {
-      @for(category of productCategories(); track category.id) {
-        @if(!category.isHidden && !(hasFilteredCategories() && !category.isFiltered)) {
-          <app-category
-            [categoryName]="category.category"
-            [categoryId]="category.id"
-            [products]="category.products"
-          ></app-category>
+      @if(productCategories.length === 0 && appStore.isRequiredProductList()) {
+        <div class="p-2 text-red-300 mx-auto">{{ emptyListMsg }}</div>
+      } @else {
+        <!-- items count {{ productCategories[1] | json }} -->
+        @for(category of productCategories; track category.id) {
+          @if(!category.isHidden && !(hasFilteredCategories() && !category.isFiltered)) {
+            <app-category
+              [categoryName]="category.category"
+              [categoryId]="category.id"
+              [products]="category.products"
+            ></app-category>
+          }
         }
       }
     }

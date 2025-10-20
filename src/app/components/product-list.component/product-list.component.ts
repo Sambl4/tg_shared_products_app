@@ -5,6 +5,8 @@ import { NgClass } from '@angular/common';
 import { IProduct } from '../../stores/with-products.store';
 import { AppStore } from '../../stores/app.store';
 import { MessageService, ServiceMessageType } from '../../services/message.service';
+import { Router } from '@angular/router';
+import { AppRoutes } from '../../app.routes';
 
 @Component({
   selector: 'app-product-list',
@@ -17,7 +19,8 @@ export class ProductListComponent {
   @Input() categoryName: string = '';
   products = input<IProduct[]>([]);
 
-  private _productService = inject(ProductService)
+  private _productService = inject(ProductService);
+  private _router = inject(Router);
   private _appStore = inject(AppStore);
   private _serviceMessage = inject(MessageService);
 
@@ -41,7 +44,8 @@ export class ProductListComponent {
         ? this._serviceMessage.showMessage('Updated', ServiceMessageType.SUCCESS)
         : this._serviceMessage.showMessage('Update failed', ServiceMessageType.ERROR)
       );
-    // todp show message to start update
-    // this.productService.updateCartById(product.id, !product.isDone);
+  }
+  goToProductCategory(productCategory: number) {
+    this._router.navigate([AppRoutes.CATEGORY, productCategory]);
   }
 }
