@@ -87,7 +87,6 @@
 
     @if(isSearching) {
       @if(searchedProducts.length) {
-        {{searchedProducts | json}}
         <app-product-list [products]="searchedProducts"></app-product-list>
       } @else {
         <div class="p-2 text-red-300 mx-auto">{{ emptyListMsg }}</div>

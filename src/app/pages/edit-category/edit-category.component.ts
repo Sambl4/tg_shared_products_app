@@ -115,11 +115,13 @@ export class EditCategoryComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this._telegram.BackButton.show();
     this._telegram.MainButton.onClick(() => this.onSaveChanges());
     this._telegram.BackButton.onClick(() => this.navigateBack());
   }
 
   ngOnDestroy(): void {
+    this._telegram.BackButton.hide();
     this._telegram.MainButton.offClick(() => this.onSaveChanges());
     this._telegram.BackButton.offClick(() => this.navigateBack());
   }

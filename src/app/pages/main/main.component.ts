@@ -1,24 +1,22 @@
-import { Component, computed, effect, inject, OnDestroy, OnInit, Signal, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { TelegramService } from '../../services/telegram.service';
 import { Router } from '@angular/router';
 import { CategoryComponent } from '../category/category.component';
 import { IconComponent } from '../../components/icons/icons.component';
 import { TogglerComponent } from '../../components/toggler/toggler.component';
 import { PopupComponent } from '../../components/popup/popup.component';
-import { JsonPipe, NgClass, SlicePipe } from '@angular/common';
+import { NgClass, SlicePipe } from '@angular/common';
 import { ProductListComponent } from '../../components/product-list.component/product-list.component';
 import { AppRoutes } from '../../app.routes';
 import { HttpService, IPostPayload, PostMethods } from '../../services/http.service';
 import { MessageService, ServiceMessageType } from '../../services/message.service';
 import { AppStore } from '../../stores/app.store';
-import { IProductCategory } from '../../stores/with-products.store';
 import { SearchComponent } from '../../components/search/search.component';
 
 @Component({
   selector: 'app-main',
   standalone: true,
   imports: [
-    JsonPipe,
     NgClass,
     SlicePipe,
     CategoryComponent,
