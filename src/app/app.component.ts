@@ -1,17 +1,24 @@
 import { Component, inject, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TelegramService } from './services/telegram.service';
 import { LoaderComponent } from './components/loader/loader.component/loader.component';
-import { ProductService } from './services/product.service';
 import { IconComponent } from './components/icons/icons.component';
 import { NgClass } from '@angular/common';
 import { LoadingService } from './services/loading.service';
 import { MessageService } from './services/message.service';
 import { AppStore } from './stores/app.store';
+import { AppRoutes } from './app.routes';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, IconComponent, LoaderComponent, NgClass ],
+  imports: [
+    NgClass,
+    RouterLink,
+    RouterLinkActive,
+    RouterOutlet,
+    IconComponent,
+    LoaderComponent,
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
@@ -21,6 +28,14 @@ export class AppComponent {
   loadingService = inject(LoadingService);
   serviceMessage = inject(MessageService);
   appStore = inject(AppStore);
+
+  protected readonly appRoutes = AppRoutes;
+
+  navigationButtons = [
+    { name: 'listCheck', route: AppRoutes.PRODUCTS },
+    { name: 'box', route: AppRoutes.PRESETS },
+    { name: 'edit', route: AppRoutes.CATEGORIES },
+  ];
 
   constructor() {
     this.telegram.ready();

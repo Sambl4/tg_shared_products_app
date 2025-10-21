@@ -9,8 +9,9 @@
         }"
       placeholder="Search..."
       iconName="search"
-      [closeOnOutsideClick]="false"
+      [closeOnOutsideClick]="true"
       (onClose)="onCloseOfSearch()"
+      (onBlur)="onCloseOfSearch()"
       (onFocus)="onFocusToSearch()"
       (onSearchTermChanged)="onSearchTermChanged($event)">
     </app-search>
@@ -110,6 +111,7 @@
       }
     }
   </div>
+
   @if(!isTgApp && draftProductsList().length) {
     <button class="tg-button" (click)="updateDraftProducts()">Update draft list</button>
   }

@@ -1,5 +1,4 @@
 import { Component, inject, input, Input } from '@angular/core';
-import { ProductService } from '../../services/product.service';
 import { IconComponent } from '../icons/icons.component';
 import { NgClass } from '@angular/common';
 import { IProduct } from '../../stores/with-products.store';
@@ -19,7 +18,6 @@ export class ProductListComponent {
   @Input() categoryName: string = '';
   products = input<IProduct[]>([]);
 
-  private _productService = inject(ProductService);
   private _router = inject(Router);
   private _appStore = inject(AppStore);
   private _serviceMessage = inject(MessageService);
@@ -46,6 +44,6 @@ export class ProductListComponent {
       );
   }
   goToProductCategory(productCategory: number) {
-    this._router.navigate([AppRoutes.CATEGORY, productCategory]);
+    this._router.navigate([AppRoutes.CATEGORIES, AppRoutes.CATEGORY, productCategory]);
   }
 }

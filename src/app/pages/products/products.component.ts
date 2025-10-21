@@ -8,10 +8,10 @@ import { IProduct } from '../../stores/with-products.store';
   selector: 'app-product',
   standalone: true,
   imports: [],
-  templateUrl: './product.component.html',
-  styleUrl: './product.component.css'
+  templateUrl: './products.component.html',
+  styleUrl: './products.component.css'
 })
-export class ProductComponent { 
+export class ProductsComponent { 
   product: IProduct | null;
   constructor(
     private _productService: ProductService,
