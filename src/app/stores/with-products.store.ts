@@ -255,9 +255,10 @@ export const withProductsStore = function() {
       });
 
       const categoryIdToProductsList = computed<Record<string, IProduct[]>>(() => {
-        // const _products = products();
         const _loadedProducts = loadedProducts();
-        return _loadedProducts.reduce((category: Record<string, IProduct[]>, product: IProduct): Record<string, IProduct[]> => {
+        const _cachedProducts = untracked(() => products());
+        const productsToUse = _loadedProducts.length > 0 ? _loadedProducts : _cachedProducts;
+        return productsToUse.reduce((category: Record<string, IProduct[]>, product: IProduct): Record<string, IProduct[]> => {
           // order is id of category
           const type = product.order;
           if (!category[type]) {

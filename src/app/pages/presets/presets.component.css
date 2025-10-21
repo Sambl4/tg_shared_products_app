@@ -1,4 +1,4 @@
-.container {
-  height: 94%;
+:host {
+  height: 100%;
   overflow-y: hidden;
 }
