@@ -1,0 +1,21 @@
+:host {
+  height: 100%;
+  overflow-y: hidden;
+}
+
+.container {
+  height: 100%;
+  overflow-y: hidden;
+  .container-list {
+    height: 80vh;
+    overflow-x: hidden;
+
+    .list-item {
+      display: flex;
+      height: 50px;
+      align-items: center;
+      border-bottom: 1px solid #ccc;
+      padding-left: 10px;
+    }
+  }
+}

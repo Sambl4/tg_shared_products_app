@@ -13,10 +13,10 @@ import { IconComponent } from '../../components/icons/icons.component';
     SearchComponent,
     IconComponent,
   ],
-  templateUrl: './categories.component.html',
-  styleUrl: './categories.component.css'
+  templateUrl: './category-list.component.html',
+  styleUrl: './category-list.component.css'
 })
-export class CategoriesComponent {
+export class CategoryListComponent {
   private _route = inject(ActivatedRoute);
   private _router = inject(Router);
   private _appStore = inject(AppStore);
@@ -33,7 +33,7 @@ export class CategoriesComponent {
   ) 
 
   onSelectCategory(categoryId: string) {
-    this._router.navigate([AppRoutes.CATEGORIES, AppRoutes.CATEGORY, categoryId]);
+    this._router.navigate([AppRoutes.EDIT, AppRoutes.CATEGORIES, AppRoutes.CATEGORY, categoryId]);
     this.isEditMode = true;
   }
 

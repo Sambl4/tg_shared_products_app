@@ -5,6 +5,7 @@ import { ProductGroupService } from "../services/product-group.service";
 export interface IProductGroup {
   groupId: string;
   groupName: string;
+  presetListId: string;
 }
 
 interface IProductsGroupState {

@@ -35,6 +35,7 @@ export const withUserStore = function() {
             name: firstName || 'Unknown',
             productListId: '',
             productListName: '',
+            presetListId: '',
           };
 
           cacheService.saveToCache(CacheKeys.CURRENT_USER, user);
@@ -45,6 +46,7 @@ export const withUserStore = function() {
             ...store.currentUser()!,
             productListId: group!.groupId,
             productListName: group!.groupName,
+            presetListId: group!.presetListId,
           };
           
           cacheService.saveToCache(CacheKeys.CURRENT_USER, user);

@@ -1,0 +1,33 @@
+<div class="preset tg-card mb-2" [ngClass]="{'selected': isPresetOpened}">
+  <div class="flex justify-between items-center">
+    <h2 class="w-full preset-name cursor-pointer" (click)="togglePreset()">
+      {{ preset()?.title }} ({{ preset()?.products!.length }})
+    </h2>
+    @if(isPresetOpened) {
+      <div class="preset-actions">
+        <button (click)="onEditPreset()">
+          <app-icon class="text-gray-400" name="edit"></app-icon>
+        </button>
+      </div>
+    }
+  </div>
+  @if(isPresetOpened && !preset()?.products!.length) {
+    <div class="p-2 text-red-300">{{ emptyListMsg }}</div>
+  } @else if(isPresetOpened && preset()?.products!.length) {
+    @if(preset()?.unknownProductIds!.length) {
+      <div class="p-2 text-red-300">
+        Unknown product ids: 
+        {{ preset()?.unknownProductIds!.join(', ') }}
+      </div>
+    }
+    <div class="preset-content">
+      <!-- <div class="preset-info mb-2 text-sm text-gray-500">
+        TODO: add description
+      </div> -->
+      <app-product-list 
+        class="preset-item" 
+        [products]="preset()?.products!">
+      </app-product-list>
+    </div>
+  }
+</div>

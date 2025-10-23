@@ -6,6 +6,7 @@ export interface IUser {
   name: string;
   productListId: string;
   productListName: string;
+  presetListId: string;
 }
 
 @Injectable({

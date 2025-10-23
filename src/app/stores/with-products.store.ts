@@ -1,4 +1,4 @@
-import { computed, inject, signal, untracked } from "@angular/core";
+import { computed, effect, inject, signal } from "@angular/core";
 import { patchState, signalStoreFeature, withComputed, withMethods, withProps, withState } from "@ngrx/signals";
 import { ProductService } from "../services/product.service";
 import { CacheKeys, CacheService } from "../services/cache.service";
@@ -34,9 +34,8 @@ interface IProductsState {
   isLoading: boolean;
   error: string | null;
   products: IProduct[];
+  cachedProducts: IProduct[];
   productCategoryIdToNameMap: Record<number, string>;
-
-  // productCategories: Record<string, TProductCategory>;
   productCategories: IProductCategory[];
   isRequiredProductList: boolean;
   filteredCategories: Record<string, boolean>;
@@ -49,6 +48,7 @@ const initialProductsState: IProductsState = {
   isLoading: false,
   error: null,
   products: [],
+  cachedProducts: [],
   productCategoryIdToNameMap: {},
   productCategories: [],
   categoryIdToProductsList: {},
@@ -74,6 +74,15 @@ export const withProductsStore = function() {
     withMethods(( store ) => {
       const productService = inject(ProductService);
       const cacheService = inject(CacheService);
+
+      effect(() => {
+        const shouldLoad = store._shouldLoad();
+        const resourceValue = store._resource.value();
+
+        if(shouldLoad && resourceValue && resourceValue.length > 0) {
+          patchState(store, { products: resourceValue });
+        }
+      });
             
       return {
         async loadCachedProducts() {
@@ -81,7 +90,7 @@ export const withProductsStore = function() {
           const isDataAvailable = cachedData && cachedData.length > 0;
           
           if (isDataAvailable) {
-            patchState( store, { products: cachedData } );
+            patchState( store, { cachedProducts: cachedData } );
           }
           
           return isDataAvailable;
@@ -231,6 +240,7 @@ export const withProductsStore = function() {
     }),
     withComputed(({
       products,
+      cachedProducts,
       isRequiredProductList,
       filteredCategories,
       _shouldLoad,
@@ -238,12 +248,13 @@ export const withProductsStore = function() {
       _searchTerm,
     }) => {
       const isLoading = computed(() => _shouldLoad() && _resource.isLoading());
-      const loadedProducts = computed(() => _shouldLoad() && _resource.value() || []);
       const error = computed(() => _shouldLoad() && _resource.error() || 'null');
 
       const productCategoryIdToNameMap = computed<Record<number, string>>(() => {
-        const _loadedProducts = loadedProducts();
-        const _cachedProducts = untracked(() => products());
+        const _loadedProducts = products();
+        // products() update should not trigger categories id, names etc.
+        // loaded data is enough to build categories map
+        const _cachedProducts = cachedProducts();
         const productsToUse = _loadedProducts.length > 0 ? _loadedProducts : _cachedProducts;
         if (!productsToUse.length) {
           return {};
@@ -255,9 +266,11 @@ export const withProductsStore = function() {
       });
 
       const categoryIdToProductsList = computed<Record<string, IProduct[]>>(() => {
-        const _loadedProducts = loadedProducts();
-        const _cachedProducts = untracked(() => products());
-        const productsToUse = _loadedProducts.length > 0 ? _loadedProducts : _cachedProducts;
+        // need to recalculate after product resource was reloaded
+        const _cachedProducts = cachedProducts();
+        const _products = products();
+        const productsToUse = _products.length > 0 ? _products : _cachedProducts;
+
         return productsToUse.reduce((category: Record<string, IProduct[]>, product: IProduct): Record<string, IProduct[]> => {
           // order is id of category
           const type = product.order;
@@ -293,16 +306,16 @@ export const withProductsStore = function() {
       });
 
       const searchTermProductsList = computed(() => {
-        const products = loadedProducts();
+        const _products = products();
         const term = _searchTerm();
-        return products.filter((product: IProduct) =>
+        return _products.filter((product: IProduct) =>
             product.title.toLowerCase().includes(term.toLowerCase()
           ));
       }); 
       
       return {
         isLoading,
-        products: loadedProducts,
+        products,
         productCategoryIdToNameMap,
         categoryIdToProductsList,
         searchTermProductsList,

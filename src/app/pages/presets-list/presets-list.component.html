@@ -1,0 +1,21 @@
+<div class="container p-4 h-full">
+  @if (isPresetListExist) {
+    <div class="h-full flex flex-col justify-between">
+      <div>
+        <app-search
+          class="block mb-2"
+          [closeOnOutsideClick]="false"
+          placeholder="Search preset"
+          (onClose)="onCancel()"
+          (onSearchTermChanged)="searchTerm.set($event)">
+        </app-search>
+        @for (item of presetList(); track $index) {
+          <app-preset [preset]="item"></app-preset>
+        }
+      </div>
+      <button (click)="onCreatePreset()" class="tg-button w-full">Create preset</button>
+    </div>
+  } @else {
+    <button class="tg-button w-full">Create preset list</button>
+  }
+</div>

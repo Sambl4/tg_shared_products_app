@@ -1,8 +1,8 @@
-<div class="container">
-  @if (editNameMode() !== null) {
-    <ng-container *ngTemplateOutlet="editNameTemplate"></ng-container>
-  } @else {
+<div class="container p-6 h-full">
+  @if (editMode() === editModes.None) {
     <ng-container *ngTemplateOutlet="defaultViewTemplate"></ng-container>
+  } @else {
+    <ng-container *ngTemplateOutlet="editNameTemplate"></ng-container>
   }
     
     <!-- update button for dev mode -->
@@ -57,21 +57,20 @@
 <ng-template #defaultViewTemplate>
     <div
       class="inline-flex w-full justify-center"
-      (click)="editCategoryName()">
+      (click)="editPresetName()">
         <h2
           class="font-medium text-xl border-b-2 border-blue-200 px-5"
-          [ngClass]="{'text-orange-500 border-orange-500': currentCategory().category !== draftCategory().category}">
-            {{ draftCategory().category }}
+          [ngClass]="{'text-orange-500 border-orange-500': currentPreset.title !== draftPreset()!.title}">
+            {{ draftPreset()!.title }}
             <app-icon name="edit" class="ml-2 text-gray-400"></app-icon>
         </h2>
     </div>
 
     <div class="container-list">
-      @for (product of draftCategory().products; track product.id) {
+      @for (product of draftPreset()!.products; track product.id) {
         <div class="list-item justify-between">
           <span>{{ product.title }}</span>
           <div class="flex mr-2 gap-5">
-            <app-icon (click)="onEditProduct(product)" name="edit" class="ml-2 text-gray-400"></app-icon>
             <app-icon (click)="onDeleteProduct(product)" name="cross" class="ml-2 text-red-700"></app-icon>
           </div>
         </div>
@@ -84,14 +83,6 @@
           </div>
         </div>
       }
-      @for (product of editedProductList; track $index) {
-        <div class="list-item justify-between bg-gray-200">
-          <span class="text-orange-500">{{ product.title }}</span>
-          <div class="flex mr-2 gap-5">
-            <app-icon (click)="onUndoEditProduct(product)" name="arrowCounterclockwise" class="font-medium text-green-500"></app-icon>
-          </div>
-        </div>
-      }
       @for (product of deletedProductList; track $index) {
         <div class="list-item justify-between bg-red-100">
           <span class="text-red-500">{{ product.title }}</span>
@@ -101,8 +92,8 @@
         </div>
       }
       <div class="my-2 flex justify-end">
-        <button class="tg-button bg-blue-600 text-white" (click)="onAddNewProduct()">
-          Add new product
+        <button class="tg-button bg-blue-600 text-white" (click)="onAddProduct()">
+          Add product
         </button>
       </div>
     </div>
@@ -111,27 +102,39 @@
 <ng-template #editNameTemplate>
   <div class="flex flex-col h-full gap-4 mx-2">
     <app-search class="flex-shrink-0"
-      [initialValue]="searchInitialValue()"
+      [initialValue]="initialSearchTerm()"
+      [placeholder]="searchPlaceholder"
       [closeOnOutsideClick]="false"
       (onClose)="onCancelEdit()"
       (onSearchTermChanged)="onSearchTermChanged($event)">
     </app-search>
 
+
     <div class="container-list flex-1 overflow-y-auto">
-      @for (name of forbiddenNames(); track $index) {
-        <div class="list-item text-gray-400">{{ name }}</div>
-      }
-      <div class="flex justify-end mt-4 gap-4">
-        @if (
-          forbiddenNames().length === 0 ||
-          searchTerm().length > 0 &&
-          forbiddenNames()[0].toLowerCase() !== searchTerm().toLowerCase() &&
-          searchInitialValue().toLowerCase() !== searchTerm().toLowerCase()
-          ) {
-          <button class="tg-button" (click)="onUpdateName()"> Update </button>
+      @if(editMode() === editModes.PresetName) {
+          @for (name of forbiddenNames(); track $index) {
+            <div class="list-item text-gray-400">{{ name }}</div>
+          }
+          <div class="flex justify-end mt-4 gap-4">
+            @if (
+              forbiddenNames().length === 0 ||
+              searchTerm().length > 0 &&
+              forbiddenNames()[0].toLowerCase() !== searchTerm().toLowerCase() &&
+              initialSearchTerm().toLowerCase() !== searchTerm().toLowerCase()
+            ) {
+              <button class="tg-button" (click)="onUpdateName()"> Update </button>
+            }
+            <button class="tg-button" (click)="onCancelEdit()"> Cancel </button>
+          </div>
+      } @else {
+        @for (product of filteredProductNames(); track $index) {
+          <div (click)="onSelectNewProduct(product)" class="list-item">{{ product.title }}</div>
         }
-        <button class="tg-button" (click)="onCancelEdit()"> Cancel </button>
-      </div>
+        <div class="flex justify-end mt-4 gap-4">
+          <button class="tg-button" (click)="onCancelEdit()"> Cancel </button>
+        </div>
+      }
+
     </div>
   </div>
 </ng-template>

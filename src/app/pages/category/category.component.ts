@@ -19,7 +19,7 @@ export class CategoryComponent implements OnInit {
   @Input() categoryName: string = '';
   @Input() products: IProduct[] = [];
   categoryId = input<string>();
-  categoryRouterPath = `${AppRoutes.CATEGORIES}/${AppRoutes.CATEGORY}`;
+  categoryRouterPath = `${AppRoutes.EDIT}/${AppRoutes.CATEGORIES}/${AppRoutes.CATEGORY}`;
   private _productService = inject(ProductService);
   private _appStore = inject(AppStore);
   isCategoryOpened = false;

@@ -205,74 +205,15 @@ export class ProductService {
     this._shouldLoad.set(load);
   }
 
-  private _products = signal<IProduct[]>([]);
-  products = this._products.asReadonly();
-
-  draftProductCount = computed(() => {
-    const products = this._products();
-    return products.filter((prod) => prod.isDraft).length;
-  });
-
-  productCategoriesMap = computed<Record<number, string>>(() => {
-    const products = this._products();
-    if (!products) {
-      return {};
-    }
-    return products.reduce((acc, product) => {
-      acc[product.order || 0] = product.category;
-      return acc;
-    }, {} as Record<number, string>);
-  });
-
-  productsByCategory = computed<TProductCategory>(() => {
-    const products = this._products();
-    return products.reduce((category: TProductCategory, product: IProduct): TProductCategory => {
-      // order is id of category
-      const type = product.order;
-      if (!category[type]) {
-        category[type] = [];
-      }
-      category[type].push(product);
-      return category;
-    }, {});
-  });
-
   constructor() {
-    effect(() => {
-      let loadingState = false;
-      if (!isTestData) {
-        const hasCachedData = this._products().length > 0;
-      };
+    // effect(() => {
+    //   let loadingState = false;
+    //   if (!isTestData) {
+    //     const hasCachedData = this._products().length > 0;
+    //   };
 
-      this._loadingService.setLoading(loadingState)
-    });
-  }
-
-  loadProducts(): void {
-    this._shouldLoad.set(true);
-  }
-
-  getProducts(): Signal<IProduct[]> {
-    return this.products;
-  }
-
-  getProductById(id: number): IProduct | undefined {
-    return this.products().find((product: IProduct) => product.id === id);
-  }
-
-  updateProductDraftState(id: number, state: boolean): void {
-    this._products.update(currentItems => currentItems.map(item => item.id === id ? {...item, isDraft: state} : item));
-  }
-
-  private loadCachedDataIfAvailable(): void {
-    const cachedData = this._cacheService.getFromCache(CacheKeys.PRODUCTS) as IProduct[] | null;
-    if (cachedData && cachedData.length > 0) {
-      this._products.set(cachedData);
-      this._messageService.showMessage(
-        'Cached Data',
-        ServiceMessageType.INFO
-      );
-    }
+    //   this._loadingService.setLoading(loadingState)
+    // });
   }
 
   async updateProductData(products: IProduct[], productListId: string) {
@@ -335,30 +276,5 @@ export class ProductService {
       .post(payload)
       .then(resp => resp)
       .catch(() => false);
-  }
-
-  getProductsByCategoryId(categoryId: string): Signal<IProduct[]> {
-    return computed(() => {
-      const prod = this.products();
-      const filteredProd = prod.filter((product: IProduct) => product.order === +categoryId)
-
-      return filteredProd;
-    });
-  }
-
-  getProductsCategories(): Record<number, string> {
-    return this.productCategoriesMap();
-  }
-
-  get productsCategory() {
-    return this.products().reduce((category: TProductCategory, product: IProduct): TProductCategory => {
-      // order is id of category
-      const type = product.order;
-      if (!category[type]) {
-        category[type] = [];
-      }
-      category[type].push(product);
-      return category;
-    }, {});
   }
 }

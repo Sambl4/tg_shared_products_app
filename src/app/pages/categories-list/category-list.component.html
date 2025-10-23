@@ -8,6 +8,7 @@
     <div class="flex flex-col h-full gap-4 mx-2">
       <app-search class="flex-shrink-0"
         [closeOnOutsideClick]="false"
+        placeholder="Search category"
         (onClose)="onCancel()"
         (onSearchTermChanged)="searchTerm.set($event)">
       </app-search>

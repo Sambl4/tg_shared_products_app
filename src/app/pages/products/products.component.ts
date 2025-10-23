@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { ProductService } from '../../services/product.service';
 import { TelegramService } from '../../services/telegram.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IProduct } from '../../stores/with-products.store';
 
 @Component({
   selector: 'app-product',
@@ -12,7 +11,6 @@ import { IProduct } from '../../stores/with-products.store';
   styleUrl: './products.component.css'
 })
 export class ProductsComponent { 
-  product: IProduct | null;
   constructor(
     private _productService: ProductService,
     private _telegramService: TelegramService,
@@ -20,7 +18,5 @@ export class ProductsComponent {
     private _router: Router,
   ) {
     const id = this._route.snapshot.paramMap.get('id') || '';
-    this.product = this._productService.getProductById(+id) || null;
-    console.log(this.product);
   }
 }

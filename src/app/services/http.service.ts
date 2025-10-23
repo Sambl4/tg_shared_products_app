@@ -4,6 +4,7 @@ import { environment } from '../../environments/environment';
 export enum RequestedDataType {
   PRODUCTS = 'products',
   GROUPS = 'groups',
+  PRESETS = 'presets',
 }
 
 export interface IGetParams {
@@ -25,6 +26,7 @@ export enum PostMethods {
   DELETE = 'Delete',
   NOTIFY = 'Notify',
   USER_UPDATE = 'UserUpdate',
+  PRESET_UPDATE = 'PresetUpdate',
 }
 
 @Injectable({

@@ -34,7 +34,7 @@ export class AppComponent {
   navigationButtons = [
     { name: 'listCheck', route: AppRoutes.PRODUCTS },
     { name: 'box', route: AppRoutes.PRESETS },
-    { name: 'edit', route: AppRoutes.CATEGORIES },
+    { name: 'edit', route: `${AppRoutes.EDIT}/${AppRoutes.CATEGORIES}` },
   ];
 
   constructor() {

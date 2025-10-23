@@ -44,6 +44,6 @@ export class ProductListComponent {
       );
   }
   goToProductCategory(productCategory: number) {
-    this._router.navigate([AppRoutes.CATEGORIES, AppRoutes.CATEGORY, productCategory]);
+    this._router.navigate([AppRoutes.EDIT, AppRoutes.CATEGORIES, AppRoutes.CATEGORY, productCategory]);
   }
 }

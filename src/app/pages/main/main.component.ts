@@ -67,7 +67,7 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (this.appStore.productCategories.length === 0) {
+    if (this.appStore.productCategories().length === 0) {
       this.loadProducts();
     }
     this._telegram.MainButton.onClick(() => this.updateDraftProducts());
