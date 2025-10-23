@@ -51,8 +51,8 @@ export class EditPresetComponent implements OnInit {
     this.editMode() === EditModes.PresetName ? this.draftPreset()!.title : ''
   );
 
-  // private fullCategoryList = this._appStore.presets().map(preset => preset.title);
-  private fullPresetsNameList = ['qqq', 'wwww'];
+  private fullPresetsNameList = this._appStore.presets().map(preset => preset.title);
+
   forbiddenNames = computed(() => {
     return this.fullPresetsNameList.filter(name =>
       name.toLowerCase().includes(this.searchTerm().toLowerCase()));
