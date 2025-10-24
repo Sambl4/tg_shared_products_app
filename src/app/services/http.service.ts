@@ -27,6 +27,7 @@ export enum PostMethods {
   NOTIFY = 'Notify',
   USER_UPDATE = 'UserUpdate',
   PRESET_UPDATE = 'PresetUpdate',
+  GENERATE_PRESET = 'GeneratePreset',
 }
 
 @Injectable({

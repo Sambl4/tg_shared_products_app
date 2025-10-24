@@ -9,9 +9,11 @@
           (onClose)="onCancel()"
           (onSearchTermChanged)="searchTerm.set($event)">
         </app-search>
-        @for (item of presetList(); track $index) {
-          <app-preset [preset]="item"></app-preset>
-        }
+        <div class="container-list flex-1 overflow-y-auto">
+          @for (item of presetList(); track $index) {
+            <app-preset [preset]="item"></app-preset>
+          }
+        </div>
       </div>
       <button (click)="onCreatePreset()" class="tg-button w-full">Create preset</button>
     </div>

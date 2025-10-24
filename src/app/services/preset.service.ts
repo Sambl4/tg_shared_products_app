@@ -10,6 +10,13 @@ export interface IPreset {
   unknownProductIds?: number[],
 }
 
+export interface IGeneratedPreset {
+  title: string;
+  products: number[];
+  newProducts: { name: string; categoryId: number }[];
+  message?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -66,4 +73,40 @@ export class PresetService {
       .then(resp => resp)
       .catch(() => false);
   }
+
+  async generatePreset(presetName: string,productListId: string) {
+    const payload: IPostPayload = {
+      method: PostMethods.GENERATE_PRESET,
+      body: {
+        data: presetName,
+        id: productListId
+      }
+    };
+    return this._httpService
+      .post(payload)
+      .then(resp => resp)
+      .catch(() => false);
+  }
+    
+    // return new Promise((resolve) => {
+    //   // TODO add error handling
+    //   setTimeout(() => resolve(
+    //     {
+    //       ok: true,
+    //       text: () => JSON.stringify({ 
+    //       title: 'Борщ',
+    //       products: [ 44, 27, 24, 26, 25, 20, 22, 74, 80, 94, 91, 23, 53 ],
+    //       newProducts: 
+    //       [ { name: 'Свекла', categoryId: 12 },
+    //         { name: 'Чеснок', categoryId: 12 },
+    //         { name: 'Томатная паста', categoryId: 10 },
+    //         { name: 'Лавровый лист', categoryId: 6 }
+    //       ],
+    //       message: '',
+    //     })
+    //     }
+    //   ),
+    //   1000);
+    // });
+  // }
 }

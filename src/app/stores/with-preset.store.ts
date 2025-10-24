@@ -1,5 +1,5 @@
 import { patchState, signalStoreFeature, withComputed, withMethods, withProps, withState } from "@ngrx/signals";
-import { IPreset, PresetService } from "../services/preset.service";
+import { IGeneratedPreset, IPreset, PresetService } from "../services/preset.service";
 import { computed, effect, inject, signal, untracked } from "@angular/core";
 import { IProduct } from "./with-products.store";
 
@@ -55,7 +55,7 @@ export const withPresetsStore = function() {
               if(typeof res === 'object' && res.ok) {
                   store._resource.reload();
                   return {
-                    status: await res.ok,
+                    status: res.ok,
                     text: await res.text()
                   };
               } else {
@@ -66,6 +66,28 @@ export const withPresetsStore = function() {
               }
             });
 
+        },
+        async generatePreset(presetName: string, productListId: string) {
+          return presetService.generatePreset(presetName, productListId)
+            .then( async res => {
+        //       return { 
+        //   title: 'Борщ',
+        //   products: [ 44, 27, 24, 26, 25, 20, 22, 74, 80, 94, 91, 23, 53 ],
+        //   newProducts: 
+        //   [ { name: 'Свекла', categoryId: 12 },
+        //     { name: 'Чеснок', categoryId: 12 },
+        //     { name: 'Томатная паста', categoryId: 10 },
+        //     { name: 'Лавровый лист', categoryId: 6 }
+        //   ],
+        //   message: '',
+        // };
+            if(typeof res === 'object' && res.ok) {
+                return JSON.parse(await res.text()) as IGeneratedPreset;
+              } else {
+                throw Error('Preset generation failed');
+              }
+          });
+          
         },
         updatePresetProductsList(products: IProduct[]) {
           const storedPresets = store._resource.value() || [];
